@@ -281,7 +281,7 @@ function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   }, [avatarUrl]);
 
   const adminRoleLabel = isSuperAdmin ? 'Super Admin' : 'Admin';
-  const roleIcon = isSuperAdmin ? Crown : UserCog;
+  const RoleIcon = isSuperAdmin ? Crown : UserCog;
   const roleIconColor = isSuperAdmin ? 'text-amber-500' : 'text-accent';
   const roleBadgeColor = isSuperAdmin ? 'bg-amber-500/20 text-amber-700 border-amber-500/30' : 'bg-accent/20 text-accent border-accent/30';
 
@@ -311,7 +311,7 @@ function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           "hidden sm:flex items-center gap-2 px-2 py-1 rounded-full border text-xs font-medium",
           roleBadgeColor
         )}>
-          {roleIcon && <roleIcon className={cn("h-3.5 w-3.5", roleIconColor)} />}
+          <RoleIcon className={cn("h-3.5 w-3.5", roleIconColor)} />
           <span>{adminRoleLabel}</span>
         </div>
 

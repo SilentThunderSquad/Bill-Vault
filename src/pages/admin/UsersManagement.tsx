@@ -68,50 +68,53 @@ export default function UsersManagement() {
       setLoading(true);
       setError(null);
 
-      // Get the admin user overview data with enhanced query
+      // First, get the basic admin user overview data
       const { data: adminData, error: usersError } = await supabase
         .from('admin_user_overview')
-        .select(`
-          *,
-          user_profiles!inner(
-            avatar_url,
-            provider,
-            social_login_provider
-          )
-        `)
+        .select('*')
         .order('signup_date', { ascending: false });
 
       if (usersError) {
-        console.error('Error fetching users:', usersError);
-        // Fallback to basic query if enhanced query fails
-        const { data: basicData, error: basicError } = await supabase
-          .from('admin_user_overview')
-          .select('*')
-          .order('signup_date', { ascending: false });
+        throw usersError;
+      }
 
-        if (basicError) {
-          throw basicError;
-        }
-
-        // Process users with fallback provider detection
-        const processedUsers = (basicData || []).map(user => ({
-          ...user,
-          provider: detectProviderFromEmail(user.email),
-          avatar_url: null
-        }));
-
-        setUsers(processedUsers);
+      if (!adminData || adminData.length === 0) {
+        setUsers([]);
         return;
       }
 
-      // Process users with available data
-      const processedUsers = (adminData || []).map(user => ({
-        ...user,
-        provider: user.user_profiles?.social_login_provider ||
-                 user.user_profiles?.provider ||
-                 detectProviderFromEmail(user.email),
-        avatar_url: user.user_profiles?.avatar_url || null
-      }));
+      // Then, get profile data separately to avoid complex joins
+      const { data: profilesData } = await supabase
+        .from('user_profiles')
+        .select('user_id, avatar_url, provider, social_login_provider')
+        .in('user_id', adminData.map(user => user.id));
+
+      // Create lookup map for profiles
+      const profilesMap = new Map();
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          profilesMap.set(profile.user_id, profile);
+        });
+      }
+
+      // Process users with enhanced provider detection
+      const processedUsers = adminData.map(user => {
+        const profile = profilesMap.get(user.id);
+
+        // Enhanced provider detection logic
+        let provider = profile?.social_login_provider || profile?.provider;
+
+        // If no provider is set, try to detect from email and other clues
+        if (!provider || provider === 'email') {
+          provider = detectProviderFromEmail(user.email);
+        }
+
+        return {
+          ...user,
+          provider: provider,
+          avatar_url: profile?.avatar_url || null
+        };
+      });
 
       setUsers(processedUsers);
     } catch (err) {
@@ -122,19 +125,39 @@ export default function UsersManagement() {
     }
   };
 
-  // Helper function to detect provider from email patterns
+  // Enhanced helper function to detect provider from email patterns and other clues
   const detectProviderFromEmail = (email: string): string => {
     if (!email) return 'email';
 
-    // Common patterns for detecting social providers
+    // Get the domain from email
     const domain = email.split('@')[1]?.toLowerCase();
 
+    // Google domains
     if (domain === 'gmail.com' || domain === 'googlemail.com') {
       return 'google';
     }
 
-    // For GitHub, users might use any email but we can't detect from email alone
-    // Most non-Gmail emails will be considered email/password
+    // Common corporate/business domains that might indicate email signup
+    const emailDomains = [
+      'outlook.com', 'hotmail.com', 'live.com', 'msn.com', // Microsoft
+      'yahoo.com', 'ymail.com', 'rocketmail.com', // Yahoo
+      'icloud.com', 'me.com', 'mac.com', // Apple
+      'protonmail.com', 'proton.me', // Proton
+      'aol.com', 'aim.com', // AOL
+    ];
+
+    // Corporate/custom domains (contain company names or are not common providers)
+    const commonProviderDomains = [
+      'gmail.com', 'googlemail.com', 'outlook.com', 'hotmail.com',
+      'yahoo.com', 'icloud.com', 'protonmail.com'
+    ];
+
+    // If it's a well-known email provider, likely email/password signup
+    if (emailDomains.includes(domain) || !commonProviderDomains.includes(domain)) {
+      return 'email';
+    }
+
+    // Default fallback
     return 'email';
   };
 
