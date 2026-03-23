@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '@/context/admin/AdminAuthContext';
 import {
@@ -21,43 +21,43 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const navigationItems = [
   {
-    path: '/dashboard',
+    path: '/admin/dashboard',
     label: 'Overview',
     icon: LayoutDashboard,
     description: 'System overview and metrics'
   },
   {
-    path: '/users',
+    path: '/admin/users',
     label: 'Users',
     icon: Users,
     description: 'User management and profiles'
   },
   {
-    path: '/bills',
+    path: '/admin/bills',
     label: 'Bills',
     icon: FileText,
     description: 'Bill management and oversight'
   },
   {
-    path: '/analytics',
+    path: '/admin/analytics',
     label: 'Analytics',
     icon: BarChart3,
     description: 'Advanced system analytics'
   },
   {
-    path: '/activity',
+    path: '/admin/activity',
     label: 'Activity',
     icon: Activity,
     description: 'User and admin activity logs'
   },
   {
-    path: '/storage',
+    path: '/admin/storage',
     label: 'Storage',
     icon: HardDrive,
     description: 'File storage management'
   },
   {
-    path: '/settings',
+    path: '/admin/settings',
     label: 'Settings',
     icon: Settings,
     description: 'System and admin settings'
@@ -68,6 +68,18 @@ export function AdminLayout() {
   const { user, signOut, isSuperAdmin } = useAdminAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Check if we're on desktop (lg breakpoint = 1024px)
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const handleSignOut = async () => {
     if (window.confirm('Are you sure you want to sign out of the admin dashboard?')) {
@@ -95,7 +107,11 @@ export function AdminLayout() {
       {/* Sidebar */}
       <motion.div
         initial={false}
-        animate={{ x: sidebarOpen ? 0 : '-100%' }}
+        animate={
+          isDesktop
+            ? { x: 0 } // Always visible on desktop
+            : { x: sidebarOpen ? 0 : '-100%' } // Animated on mobile
+        }
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border lg:relative lg:translate-x-0',
           'lg:flex lg:w-64 lg:flex-col'
@@ -151,7 +167,8 @@ export function AdminLayout() {
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
             {navigationItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              const isActive = location.pathname === item.path ||
+                              (item.path === '/admin/dashboard' && location.pathname === '/admin');
 
               return (
                 <Link
@@ -206,7 +223,10 @@ export function AdminLayout() {
                 <Shield className="h-4 w-4" />
                 <span>/</span>
                 <span className="text-foreground font-medium">
-                  {navigationItems.find(item => item.path === location.pathname)?.label || 'Admin'}
+                  {navigationItems.find(item =>
+                    item.path === location.pathname ||
+                    (item.path === '/admin/dashboard' && location.pathname === '/admin')
+                  )?.label || 'Admin'}
                 </span>
               </div>
             </div>

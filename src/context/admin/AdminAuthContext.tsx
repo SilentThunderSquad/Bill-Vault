@@ -12,11 +12,12 @@ interface AdminAuthError {
 }
 
 interface AdminAuthContextType {
-  user: AdminUser | null;
+  user: User | null;
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  error: string | null;
   signInWithProvider: (provider: 'google' | 'github') => Promise<{ error: AdminAuthError | null }>;
   signOut: () => Promise<void>;
   checkAdminRole: () => Promise<boolean>;
@@ -25,144 +26,44 @@ interface AdminAuthContextType {
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to check if user has admin role
-  const checkAdminRole = async (userId?: string): Promise<boolean> => {
-    try {
-      const targetUserId = userId || session?.user?.id;
-      if (!targetUserId) return false;
-
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', targetUserId)
-        .single();
-
-      if (error || !data) {
-        console.log('No admin role found for user:', targetUserId);
-        return false;
-      }
-
-      const adminRole = data.role;
-      const hasAdminRole = adminRole === 'admin' || adminRole === 'super_admin';
-
-      if (hasAdminRole) {
-        setIsAdmin(true);
-        setIsSuperAdmin(adminRole === 'super_admin');
-      }
-
-      return hasAdminRole;
-    } catch (error) {
-      console.error('Error checking admin role:', error);
-      return false;
-    }
-  };
-
-  // Enhanced user object with role information
-  const createAdminUser = async (baseUser: User): Promise<AdminUser | null> => {
-    try {
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', baseUser.id)
-        .single();
-
-      if (!roleData || !['admin', 'super_admin'].includes(roleData.role)) {
-        return null; // Not an admin user
-      }
-
-      // Get permissions if needed
-      const { data: permissions } = await supabase
-        .from('admin_permissions')
-        .select('permission')
-        .eq('user_id', baseUser.id);
-
-      return {
-        ...baseUser,
-        role: roleData.role as 'admin' | 'super_admin',
-        permissions: permissions?.map(p => p.permission) || []
-      };
-    } catch (error) {
-      console.error('Error creating admin user object:', error);
-      return null;
-    }
-  };
-
-  // Initialize auth state
+  // Simple session management (like user auth)
   useEffect(() => {
     // Get initial session
-    const initializeAuth = async () => {
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
 
-        if (error) {
-          console.error('Error getting session:', error);
-          setLoading(false);
-          return;
-        }
-
-        if (initialSession?.user) {
-          const hasRole = await checkAdminRole(initialSession.user.id);
-          if (hasRole) {
-            const adminUser = await createAdminUser(initialSession.user);
-            if (adminUser) {
-              setUser(adminUser);
-              setSession(initialSession);
-            } else {
-              // User exists but is not admin
-              console.log('User does not have admin privileges');
-              await supabase.auth.signOut();
-            }
-          } else {
-            // No admin role, sign out
-            await supabase.auth.signOut();
-          }
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
+      // Check admin role if user exists
+      if (session?.user) {
+        checkAdminRoleForUser(session.user.id);
+      } else {
         setLoading(false);
       }
-    };
-
-    initializeAuth();
+    }).catch(() => {
+      // Network error - don't block the app
+      setLoading(false);
+    });
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Admin auth state changed:', event);
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
 
-        if (event === 'SIGNED_OUT' || !session) {
-          setUser(null);
-          setSession(null);
+        // Check admin role if user exists, otherwise finish loading
+        if (session?.user) {
+          checkAdminRoleForUser(session.user.id);
+        } else {
           setIsAdmin(false);
           setIsSuperAdmin(false);
-          setLoading(false);
-          return;
-        }
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          setLoading(true);
-          const hasRole = await checkAdminRole(session.user.id);
-
-          if (hasRole) {
-            const adminUser = await createAdminUser(session.user);
-            if (adminUser) {
-              setUser(adminUser);
-              setSession(session);
-            } else {
-              console.log('Failed to create admin user object');
-              await supabase.auth.signOut();
-            }
-          } else {
-            console.log('User authenticated but does not have admin role');
-            await supabase.auth.signOut();
-          }
+          setError(null);
           setLoading(false);
         }
       }
@@ -170,6 +71,73 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Separate function for admin role checking (not in auth flow)
+  const checkAdminRoleForUser = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        // Handle database schema issues
+        if (error.code === 'PGRST116' || error.message?.includes('relation "public.user_roles" does not exist')) {
+          console.warn('Admin database schema not found. Please run admin.sql migration.');
+          setError('Admin database not configured. Please contact system administrator.');
+          setIsAdmin(false);
+          setIsSuperAdmin(false);
+        } else if (error.code === 'PGRST116' || error.details?.includes('0 rows')) {
+          // User has no role (table exists but user not in it)
+          setError('Access denied. This account does not have admin privileges.');
+          setIsAdmin(false);
+          setIsSuperAdmin(false);
+        } else {
+          console.error('Database error checking admin role:', error);
+          setError('Database connection error. Please try again.');
+          setIsAdmin(false);
+          setIsSuperAdmin(false);
+        }
+      } else if (!data) {
+        setError('Access denied. This account does not have admin privileges.');
+        setIsAdmin(false);
+        setIsSuperAdmin(false);
+      } else {
+        const adminRole = data.role;
+        const hasAdminRole = adminRole === 'admin' || adminRole === 'super_admin';
+
+        if (hasAdminRole) {
+          setIsAdmin(true);
+          setIsSuperAdmin(adminRole === 'super_admin');
+          setError(null); // Clear any previous errors
+        } else {
+          setError('Access denied. This account does not have admin privileges.');
+          setIsAdmin(false);
+          setIsSuperAdmin(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      if (error instanceof Error && error.message.includes('relation "public.user_roles" does not exist')) {
+        setError('Admin database not configured. Please apply the admin database schema.');
+      } else {
+        setError('Failed to verify admin access. Please try again.');
+      }
+      setIsAdmin(false);
+      setIsSuperAdmin(false);
+    } finally {
+      // Always resolve loading state
+      setLoading(false);
+    }
+  };
+
+  // Public function for manual role checking
+  const checkAdminRole = async (): Promise<boolean> => {
+    if (!user) return false;
+    await checkAdminRoleForUser(user.id);
+    return isAdmin;
+  };
 
   const signInWithProvider = async (provider: 'google' | 'github'): Promise<{ error: AdminAuthError | null }> => {
     try {
@@ -198,6 +166,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setIsAdmin(false);
       setIsSuperAdmin(false);
+      setError(null);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -211,6 +180,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         loading,
         isAdmin,
         isSuperAdmin,
+        error,
         signInWithProvider,
         signOut,
         checkAdminRole

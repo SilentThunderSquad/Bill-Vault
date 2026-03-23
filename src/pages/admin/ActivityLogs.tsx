@@ -23,48 +23,48 @@ import {
   Database,
   Download
 } from 'lucide-react';
+import { supabase } from '@/services/supabase';
 import { cn } from '@/utils/cn';
 import { toast } from 'sonner';
 
 interface ActivityLog {
   id: string;
-  user_id: string | null;
-  user_email: string | null;
-  user_full_name: string | null;
+  admin_id: string;
   action: string;
   resource_type: string;
   resource_id: string | null;
   details: Record<string, any> | null;
   ip_address: string | null;
   user_agent: string | null;
-  severity: 'info' | 'warning' | 'error' | 'critical';
-  timestamp: string;
-  session_id: string | null;
+  created_at: string;
+  // Additional fields for compatibility with UI
+  user_id?: string | null;
+  user_email?: string | null;
+  user_full_name?: string | null;
+  severity?: string;
+  timestamp?: string;
+  session_id?: string | null;
 }
 
 interface ActivityFilters {
   search: string;
   action: string;
   resourceType: string;
-  severity: 'all' | 'info' | 'warning' | 'error' | 'critical';
   dateRange: 'all' | 'today' | 'week' | 'month';
+  adminId: string;
+  severity: string;
   userId: string;
 }
 
 const actionTypes = [
-  'user.login',
-  'user.logout',
-  'user.register',
-  'user.password_change',
-  'bill.create',
-  'bill.update',
-  'bill.delete',
-  'bill.view',
   'admin.user_suspend',
   'admin.user_activate',
   'admin.user_delete',
   'admin.bill_delete',
+  'admin.bill_archive',
   'admin.settings_update',
+  'admin.login',
+  'admin.logout',
   'system.backup',
   'system.error'
 ];
@@ -72,7 +72,6 @@ const actionTypes = [
 const resourceTypes = [
   'user',
   'bill',
-  'authentication',
   'admin',
   'system'
 ];
@@ -85,8 +84,9 @@ export default function ActivityLogs() {
     search: '',
     action: 'all',
     resourceType: 'all',
-    severity: 'all',
     dateRange: 'all',
+    adminId: '',
+    severity: 'all',
     userId: ''
   });
   const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null);
@@ -102,90 +102,48 @@ export default function ActivityLogs() {
       setLoading(true);
       setError(null);
 
-      // For now, we'll use mock data as the activity_logs table would need to be created
-      // In production, this would query the actual activity logs table
-      const mockLogs: ActivityLog[] = [
+      const { data, error: logsError } = await supabase
+        .from('admin_activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1000);
+
+      if (logsError) {
+        throw logsError;
+      }
+
+      setLogs(data || []);
+    } catch (err) {
+      console.error('Error loading activity logs:', err);
+      setError('Failed to load activity logs');
+
+      // Use mock data for development if database query fails
+      const mockLogs = [
         {
           id: '1',
-          user_id: 'user-1',
-          user_email: 'john.doe@example.com',
-          user_full_name: 'John Doe',
-          action: 'user.login',
-          resource_type: 'authentication',
+          admin_id: 'admin-1',
+          action: 'admin.login',
+          resource_type: 'admin',
           resource_id: null,
-          details: { ip: '192.168.1.100', location: 'New York, US' },
-          ip_address: '192.168.1.100',
-          user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          severity: 'info',
-          timestamp: new Date().toISOString(),
-          session_id: 'session-123'
+          details: { ip: '192.168.1.1' },
+          ip_address: '192.168.1.1',
+          user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          created_at: new Date().toISOString()
         },
         {
           id: '2',
-          user_id: 'user-2',
-          user_email: 'jane.smith@example.com',
-          user_full_name: 'Jane Smith',
-          action: 'bill.create',
-          resource_type: 'bill',
-          resource_id: 'bill-456',
-          details: { title: 'Grocery Receipt', amount: 45.67, vendor: 'SuperMart' },
-          ip_address: '192.168.1.101',
-          user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-          severity: 'info',
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          session_id: 'session-456'
-        },
-        {
-          id: '3',
-          user_id: null,
-          user_email: 'admin@bill-vault.com',
-          user_full_name: 'System Admin',
+          admin_id: 'admin-1',
           action: 'admin.user_suspend',
-          resource_type: 'admin',
-          resource_id: 'user-3',
-          details: { reason: 'Suspicious activity detected', suspended_user: 'spammer@example.com' },
-          ip_address: '10.0.0.1',
-          user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          severity: 'warning',
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
-          session_id: 'admin-session-789'
-        },
-        {
-          id: '4',
-          user_id: null,
-          user_email: null,
-          user_full_name: null,
-          action: 'system.error',
-          resource_type: 'system',
-          resource_id: null,
-          details: { error: 'Database connection timeout', service: 'ocr-processor' },
-          ip_address: null,
-          user_agent: null,
-          severity: 'error',
-          timestamp: new Date(Date.now() - 10800000).toISOString(),
-          session_id: null
-        },
-        {
-          id: '5',
-          user_id: 'user-4',
-          user_email: 'bob.wilson@example.com',
-          user_full_name: 'Bob Wilson',
-          action: 'user.password_change',
-          resource_type: 'authentication',
-          resource_id: null,
-          details: { method: 'self_service' },
-          ip_address: '203.0.113.45',
-          user_agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
-          severity: 'info',
-          timestamp: new Date(Date.now() - 14400000).toISOString(),
-          session_id: 'mobile-session-321'
+          resource_type: 'user',
+          resource_id: 'user-123',
+          details: { reason: 'Terms violation' },
+          ip_address: '192.168.1.1',
+          user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          created_at: new Date(Date.now() - 3600000).toISOString()
         }
       ];
 
       setLogs(mockLogs);
-    } catch (err) {
-      console.error('Error loading activity logs:', err);
-      setError('Failed to load activity logs');
     } finally {
       setLoading(false);
     }
@@ -212,9 +170,8 @@ export default function ActivityLogs() {
     const searchTerm = filters.search.toLowerCase();
     const matchesSearch = !searchTerm ||
       log.action.toLowerCase().includes(searchTerm) ||
-      log.user_email?.toLowerCase().includes(searchTerm) ||
-      log.user_full_name?.toLowerCase().includes(searchTerm) ||
       log.resource_type.toLowerCase().includes(searchTerm) ||
+      log.admin_id.toLowerCase().includes(searchTerm) ||
       JSON.stringify(log.details).toLowerCase().includes(searchTerm);
 
     // Action filter
@@ -223,42 +180,25 @@ export default function ActivityLogs() {
     // Resource type filter
     const matchesResourceType = filters.resourceType === 'all' || log.resource_type === filters.resourceType;
 
-    // Severity filter
-    const matchesSeverity = filters.severity === 'all' || log.severity === filters.severity;
-
     // Date range filter
     const dateRangeFilter = getDateRangeFilter();
+    const logDate = log.timestamp || log.created_at;
     const matchesDateRange = !dateRangeFilter ||
       (filters.dateRange === 'today'
-        ? new Date(log.timestamp).toDateString() === dateRangeFilter
-        : new Date(log.timestamp) >= new Date(dateRangeFilter));
+        ? new Date(logDate).toDateString() === dateRangeFilter
+        : new Date(logDate) >= new Date(dateRangeFilter));
+
+    // Admin filter
+    const matchesAdmin = !filters.adminId || log.admin_id === filters.adminId;
+
+    // Severity filter
+    const matchesSeverity = filters.severity === 'all' || (log.severity === filters.severity);
 
     // User filter
-    const matchesUser = !filters.userId || log.user_id === filters.userId;
+    const matchesUser = !filters.userId || (log.user_id === filters.userId);
 
-    return matchesSearch && matchesAction && matchesResourceType &&
-           matchesSeverity && matchesDateRange && matchesUser;
+    return matchesSearch && matchesAction && matchesResourceType && matchesDateRange && matchesAdmin && matchesSeverity && matchesUser;
   });
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'info': return 'bg-blue-500/20 text-blue-500 border-blue-500/30';
-      case 'warning': return 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30';
-      case 'error': return 'bg-red-500/20 text-red-500 border-red-500/30';
-      case 'critical': return 'bg-red-500/30 text-red-500 border-red-500/50';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'info': return <Info className="h-3 w-3" />;
-      case 'warning': return <AlertTriangle className="h-3 w-3" />;
-      case 'error': return <XCircle className="h-3 w-3" />;
-      case 'critical': return <XCircle className="h-3 w-3" />;
-      default: return <Info className="h-3 w-3" />;
-    }
-  };
 
   const getActionIcon = (action: string) => {
     if (action.includes('login')) return <LogIn className="h-4 w-4" />;
@@ -281,6 +221,33 @@ export default function ActivityLogs() {
     return 'text-muted-foreground';
   };
 
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'error':
+      case 'critical':
+        return <XCircle className="h-3 w-3" />;
+      case 'warning':
+        return <AlertTriangle className="h-3 w-3" />;
+      case 'info':
+      default:
+        return <Info className="h-3 w-3" />;
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'bg-red-500/20 text-red-500 border-red-500/30';
+      case 'error':
+        return 'bg-red-500/10 text-red-600 border-red-500/20';
+      case 'warning':
+        return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
+      case 'info':
+      default:
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+    }
+  };
+
   const refreshLogs = async () => {
     setRefreshing(true);
     await loadActivityLogs();
@@ -291,16 +258,15 @@ export default function ActivityLogs() {
   const exportLogs = () => {
     try {
       // Create CSV content
-      const headers = ['Timestamp', 'User Email', 'Action', 'Resource Type', 'IP Address', 'Severity', 'Details'];
+      const headers = ['Timestamp', 'Admin ID', 'Action', 'Resource Type', 'IP Address', 'Details'];
       const csvContent = [
         headers.join(','),
         ...filteredLogs.map(log => [
-          new Date(log.timestamp).toLocaleString(),
-          log.user_email || 'System',
+          new Date(log.timestamp || log.created_at).toLocaleString(),
+          log.admin_id || 'System',
           log.action,
           log.resource_type,
           log.ip_address || 'N/A',
-          log.severity,
           JSON.stringify(log.details).replace(/"/g, '""') // Escape quotes for CSV
         ].map(field => `"${field}"`).join(','))
       ].join('\n');
@@ -501,24 +467,24 @@ export default function ActivityLogs() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <div className="text-sm">
                           <p className="text-foreground">
-                            {new Date(log.timestamp).toLocaleDateString()}
+                            {new Date(log.timestamp || log.created_at).toLocaleDateString()}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(log.timestamp).toLocaleTimeString()}
+                            {new Date(log.timestamp || log.created_at).toLocaleTimeString()}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      {log.user_email ? (
+                      {log.user_email || log.admin_id ? (
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <div className="text-sm min-w-0">
                             <p className="text-foreground truncate">
-                              {log.user_full_name || log.user_email.split('@')[0]}
+                              {log.user_full_name || log.user_email?.split('@')[0] || log.admin_id}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">
-                              {log.user_email}
+                              {log.user_email || `Admin: ${log.admin_id}`}
                             </p>
                           </div>
                         </div>
@@ -550,10 +516,10 @@ export default function ActivityLogs() {
                     <td className="py-3 px-4">
                       <span className={cn(
                         'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
-                        getSeverityColor(log.severity)
+                        getSeverityColor(log.severity || 'info')
                       )}>
-                        {getSeverityIcon(log.severity)}
-                        {log.severity}
+                        {getSeverityIcon(log.severity || 'info')}
+                        {log.severity || 'info'}
                       </span>
                     </td>
                     <td className="py-3 px-4">
@@ -609,7 +575,7 @@ export default function ActivityLogs() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
                   <p className="text-foreground">
-                    {new Date(selectedLog.timestamp).toLocaleString()}
+                    {new Date(selectedLog.timestamp || selectedLog.created_at).toLocaleString()}
                   </p>
                 </div>
                 <div>
@@ -624,10 +590,10 @@ export default function ActivityLogs() {
                   <label className="text-sm font-medium text-muted-foreground">Severity</label>
                   <span className={cn(
                     'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
-                    getSeverityColor(selectedLog.severity)
+                    getSeverityColor(selectedLog.severity || 'info')
                   )}>
-                    {getSeverityIcon(selectedLog.severity)}
-                    {selectedLog.severity}
+                    {getSeverityIcon(selectedLog.severity || 'info')}
+                    {selectedLog.severity || 'info'}
                   </span>
                 </div>
                 {selectedLog.resource_id && (

@@ -81,80 +81,85 @@ export default function StorageManagement() {
       setLoading(true);
       setError(null);
 
-      // This would typically query the storage bucket and associated metadata
-      // For now, we'll use mock data that represents what would come from Supabase Storage
-      const mockFiles: StorageFile[] = [
-        {
-          id: '1',
-          name: 'receipt_walmart_2024.pdf',
-          path: 'bills/user-123/receipt_walmart_2024.pdf',
-          size: 2048576, // 2MB
-          type: 'application/pdf',
-          uploaded_at: new Date().toISOString(),
-          user_id: 'user-123',
-          user_email: 'john.doe@example.com',
-          bill_id: 'bill-456',
-          bill_title: 'Walmart Grocery Receipt',
-          is_thumbnail: false,
-          last_accessed_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'thumb_receipt_walmart_2024.jpg',
-          path: 'thumbnails/receipt_walmart_2024.jpg',
-          size: 45632, // 45KB
-          type: 'image/jpeg',
-          uploaded_at: new Date().toISOString(),
-          user_id: 'user-123',
-          user_email: 'john.doe@example.com',
-          bill_id: 'bill-456',
-          bill_title: 'Walmart Grocery Receipt',
-          is_thumbnail: true,
-          last_accessed_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: 'invoice_electric_company.png',
-          path: 'bills/user-456/invoice_electric_company.png',
-          size: 1536000, // 1.5MB
-          type: 'image/png',
-          uploaded_at: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-          user_id: 'user-456',
-          user_email: 'jane.smith@example.com',
-          bill_id: 'bill-789',
-          bill_title: 'Electric Company Invoice',
-          is_thumbnail: false,
-          last_accessed_at: null
-        },
-        {
-          id: '4',
-          name: 'orphaned_file.pdf',
-          path: 'bills/deleted-user/orphaned_file.pdf',
-          size: 1024000, // 1MB
-          type: 'application/pdf',
-          uploaded_at: new Date(Date.now() - 2592000000).toISOString(), // 30 days ago
-          user_id: null,
-          user_email: null,
-          bill_id: null,
-          bill_title: null,
-          is_thumbnail: false,
-          last_accessed_at: null
-        }
-      ];
+      // Get storage files from Supabase storage and cross-reference with bills
+      const { data: storageFiles, error: storageError } = await supabase.storage
+        .from('bill-images')
+        .list('', {
+          limit: 1000,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
 
-      setFiles(mockFiles);
+      if (storageError) {
+        throw storageError;
+      }
 
-      // Calculate storage statistics
-      const totalFiles = mockFiles.length;
-      const totalSize = mockFiles.reduce((sum, file) => sum + file.size, 0);
-      const documentFiles = mockFiles.filter(f => f.type.includes('pdf') && !f.is_thumbnail).length;
-      const documentSize = mockFiles.filter(f => f.type.includes('pdf') && !f.is_thumbnail).reduce((sum, f) => sum + f.size, 0);
-      const imageFiles = mockFiles.filter(f => f.type.includes('image') && !f.is_thumbnail).length;
-      const imageSize = mockFiles.filter(f => f.type.includes('image') && !f.is_thumbnail).reduce((sum, f) => sum + f.size, 0);
-      const thumbnailFiles = mockFiles.filter(f => f.is_thumbnail).length;
-      const thumbnailSize = mockFiles.filter(f => f.is_thumbnail).reduce((sum, f) => sum + f.size, 0);
-      const orphanedFiles = mockFiles.filter(f => !f.user_id || !f.bill_id).length;
-      const orphanedSize = mockFiles.filter(f => !f.user_id || !f.bill_id).reduce((sum, f) => sum + f.size, 0);
+      // Get bill metadata to cross-reference storage files
+      const { data: bills, error: billsError } = await supabase
+        .from('bills')
+        .select(`
+          id,
+          bill_file_url,
+          product_name,
+          user_id,
+          created_at
+        `);
+
+      if (billsError) {
+        throw billsError;
+      }
+
+      // Get user emails for storage files
+      const { data: userProfiles, error: userError } = await supabase
+        .from('user_profiles')
+        .select('user_id, full_name')
+        .in('user_id', bills.map(b => b.user_id));
+
+      if (userError) {
+        console.warn('Could not load user profiles:', userError);
+      }
+
+      // Convert storage file data to our interface format
+      const processedFiles: StorageFile[] = storageFiles
+        ?.filter(file => file.name !== '.emptyFolderPlaceholder')
+        ?.map(file => {
+          // Find associated bill
+          const associatedBill = bills.find(bill =>
+            bill.bill_file_url && bill.bill_file_url.includes(file.name)
+          );
+
+          // Find user profile
+          const userProfile = associatedBill ?
+            userProfiles?.find(up => up.user_id === associatedBill.user_id) : null;
+
+          return {
+            id: file.id || `${file.name}-${Date.now()}`,
+            name: file.name,
+            path: `bill-images/${file.name}`,
+            size: file.metadata?.size || 0,
+            type: file.metadata?.mimetype || 'unknown',
+            uploaded_at: file.created_at || file.updated_at || new Date().toISOString(),
+            user_id: associatedBill?.user_id || null,
+            user_email: userProfile?.full_name || 'Unknown User',
+            bill_id: associatedBill?.id || null,
+            bill_title: associatedBill?.product_name || null,
+            is_thumbnail: file.name.includes('thumb') || file.name.includes('thumbnail'),
+            last_accessed_at: file.last_accessed_at || null
+          };
+        }) || [];
+
+      setFiles(processedFiles);
+
+      // Calculate real storage statistics
+      const totalFiles = processedFiles.length;
+      const totalSize = processedFiles.reduce((sum, file) => sum + file.size, 0);
+      const documentFiles = processedFiles.filter(f => f.type.includes('pdf') && !f.is_thumbnail).length;
+      const documentSize = processedFiles.filter(f => f.type.includes('pdf') && !f.is_thumbnail).reduce((sum, f) => sum + f.size, 0);
+      const imageFiles = processedFiles.filter(f => f.type.includes('image') && !f.is_thumbnail).length;
+      const imageSize = processedFiles.filter(f => f.type.includes('image') && !f.is_thumbnail).reduce((sum, f) => sum + f.size, 0);
+      const thumbnailFiles = processedFiles.filter(f => f.is_thumbnail).length;
+      const thumbnailSize = processedFiles.filter(f => f.is_thumbnail).reduce((sum, f) => sum + f.size, 0);
+      const orphanedFiles = processedFiles.filter(f => !f.user_id || !f.bill_id).length;
+      const orphanedSize = processedFiles.filter(f => !f.user_id || !f.bill_id).reduce((sum, f) => sum + f.size, 0);
 
       setStats({
         totalFiles,
@@ -233,7 +238,7 @@ export default function StorageManagement() {
         case 'download':
           // Create signed URL for download
           const { data } = await supabase.storage
-            .from('bill-documents')
+            .from('bill-images')
             .createSignedUrl(file.path, 60);
 
           if (data?.signedUrl) {
@@ -245,7 +250,7 @@ export default function StorageManagement() {
         case 'delete':
           if (window.confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
             await supabase.storage
-              .from('bill-documents')
+              .from('bill-images')
               .remove([file.path]);
 
             setFiles(prev => prev.filter(f => f.id !== fileId));
@@ -271,7 +276,7 @@ export default function StorageManagement() {
         const paths = filesToDelete.map(f => f.path);
 
         await supabase.storage
-          .from('bill-documents')
+          .from('bill-images')
           .remove(paths);
 
         setFiles(prev => prev.filter(f => !selectedFiles.has(f.id)));
@@ -292,7 +297,7 @@ export default function StorageManagement() {
 
         if (paths.length > 0) {
           await supabase.storage
-            .from('bill-documents')
+            .from('bill-images')
             .remove(paths);
 
           setFiles(prev => prev.filter(f => f.user_id && f.bill_id));
