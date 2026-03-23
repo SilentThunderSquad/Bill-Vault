@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Receipt, PlusCircle, Bell, User } from 'lucide-react';
+import { LayoutDashboard, Receipt, PlusCircle, Bell, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -9,7 +9,7 @@ const navItems = [
   { label: 'Bills', href: '/bills', icon: Receipt },
   { label: 'Add', href: '/bills/new', icon: PlusCircle, isAction: true },
   { label: 'Alerts', href: '/notifications', icon: Bell, showBadge: true },
-  { label: 'Profile', href: '/settings', icon: User },
+  { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function BottomNav() {

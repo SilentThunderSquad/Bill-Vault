@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { AdminBottomNav } from './AdminBottomNav';
+import { AdminMobileHeader } from './AdminMobileHeader';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +35,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { UserProfile } from '@/types';
 
 const adminNavigationItems = [
@@ -359,6 +362,7 @@ function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   // Initialize sidebar collapsed state from localStorage
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -374,8 +378,14 @@ export function AdminLayout() {
     localStorage.setItem('admin-sidebar-collapsed', JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen h-[100dvh] bg-background flex overflow-hidden">
+      {/* Desktop Sidebar */}
       <AdminSidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -384,14 +394,42 @@ export function AdminLayout() {
       />
 
       <div className={cn(
-        "lg:transition-all lg:duration-300",
+        "flex-1 flex flex-col min-h-0 w-full",
+        "transition-all duration-300",
         sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
       )}>
-        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        {/* Desktop Header - hidden on mobile */}
+        <div className="hidden lg:block shrink-0">
+          <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        </div>
 
-        <main className="p-4 lg:p-6">
-          <Outlet />
+        {/* Mobile Header - visible only on mobile */}
+        <AdminMobileHeader className="lg:hidden shrink-0" />
+
+        {/* Main Content with page transitions */}
+        <main className={cn(
+          "flex-1 overflow-y-auto overflow-x-hidden",
+          "-webkit-overflow-scrolling-touch",
+          // Horizontal and top padding
+          "px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8",
+          // Bottom padding: 128px for mobile (nav 64px + safe area 34px + extra 30px), normal for desktop
+          "pb-32 lg:pb-8"
+        )}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
+
+        {/* Bottom Navigation - Mobile only */}
+        <AdminBottomNav />
       </div>
     </div>
   );

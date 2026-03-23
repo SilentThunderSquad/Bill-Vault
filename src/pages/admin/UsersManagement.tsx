@@ -350,7 +350,7 @@ export default function UsersManagement() {
         </div>
       )}
 
-      {/* Users Table */}
+      {/* Users Table/Cards */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
@@ -358,171 +358,290 @@ export default function UsersManagement() {
             <p className="text-muted-foreground">Loading users...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 border-b border-border">
-                <tr>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">User</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Bills</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Storage</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Last Login</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length === 0 ? (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                      <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      {filters.search || filters.status !== 'all' || filters.role !== 'all'
-                        ? 'No users match your filters'
-                        : 'No users found'
-                      }
-                    </td>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">User</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Bills</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Storage</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Last Login</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
                   </tr>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <motion.tr
-                      key={user.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="border-b border-border hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
-                            <Users className="h-5 w-5 text-accent" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground">
-                              {user.full_name || user.email.split('@')[0]}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
-                            {user.country && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <MapPin className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">{user.country}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                </thead>
+                <tbody>
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                        <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        {filters.search || filters.status !== 'all' || filters.role !== 'all'
+                          ? 'No users match your filters'
+                          : 'No users found'
+                        }
                       </td>
-                      <td className="py-3 px-4">
-                        <span className={cn(
-                          'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border',
-                          getStatusColor(user.activity_status)
-                        )}>
-                          {user.activity_status}
-                        </span>
-                        {user.role && user.role !== 'user' && (
-                          <span className="block mt-1 text-xs text-accent">
-                            {user.role}
+                    </tr>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <motion.tr
+                        key={user.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-border hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+                              <Users className="h-5 w-5 text-accent" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {user.full_name || user.email.split('@')[0]}
+                              </p>
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                              {user.country && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <MapPin className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">{user.country}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={cn(
+                            'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border',
+                            getStatusColor(user.activity_status)
+                          )}>
+                            {user.activity_status}
                           </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          {user.role && user.role !== 'user' && (
+                            <span className="block mt-1 text-xs text-accent">
+                              {user.role}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-foreground">
+                              {user.total_bills || 0}
+                            </span>
+                          </div>
+                          {user.total_spent && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              ${user.total_spent.toLocaleString()}
+                            </p>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
                           <span className="text-sm text-foreground">
-                            {user.total_bills || 0}
+                            {formatBytes(user.storage_used_bytes)}
                           </span>
-                        </div>
-                        {user.total_spent && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            ${user.total_spent.toLocaleString()}
-                          </p>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-sm text-foreground">
-                          {formatBytes(user.storage_used_bytes)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {user.last_login_at ? (
-                          <div>
-                            <p className="text-sm text-foreground">
-                              {new Date(user.last_login_at).toLocaleDateString()}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(user.last_login_at).toLocaleTimeString()}
-                            </p>
+                        </td>
+                        <td className="py-3 px-4">
+                          {user.last_login_at ? (
+                            <div>
+                              <p className="text-sm text-foreground">
+                                {new Date(user.last_login_at).toLocaleDateString()}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(user.last_login_at).toLocaleTimeString()}
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Never</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowUserModal(true);
+                              }}
+                              className="p-1 hover:bg-accent/20 rounded transition-colors"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
+                            </button>
+                            <button
+                              onClick={() => handleUserAction(user.id, 'suspend')}
+                              disabled={actionLoading === user.id}
+                              className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
+                              title="Suspend User"
+                            >
+                              <UserX className="h-4 w-4 text-muted-foreground hover:text-yellow-500" />
+                            </button>
+                            <button
+                              onClick={() => handleUserAction(user.id, 'delete')}
+                              disabled={actionLoading === user.id}
+                              className="p-1 hover:bg-destructive/20 rounded transition-colors"
+                              title="Delete User"
+                            >
+                              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                            </button>
                           </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">Never</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setShowUserModal(true);
-                            }}
-                            className="p-1 hover:bg-accent/20 rounded transition-colors"
-                            title="View Details"
-                          >
-                            <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                          </button>
-                          <button
-                            onClick={() => handleUserAction(user.id, 'suspend')}
-                            disabled={actionLoading === user.id}
-                            className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
-                            title="Suspend User"
-                          >
-                            <UserX className="h-4 w-4 text-muted-foreground hover:text-yellow-500" />
-                          </button>
-                          <button
-                            onClick={() => handleUserAction(user.id, 'delete')}
-                            disabled={actionLoading === user.id}
-                            className="p-1 hover:bg-destructive/20 rounded transition-colors"
-                            title="Delete User"
-                          >
-                            <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                          </button>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4 p-4">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>
+                    {filters.search || filters.status !== 'all' || filters.role !== 'all'
+                      ? 'No users match your filters'
+                      : 'No users found'
+                    }
+                  </p>
+                </div>
+              ) : (
+                filteredUsers.map((user) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-background border border-border rounded-lg p-4 space-y-3"
+                  >
+                    {/* User Info Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center shrink-0">
+                          <Users className="h-6 w-6 text-accent" />
                         </div>
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-foreground truncate">
+                            {user.full_name || user.email.split('@')[0]}
+                          </h3>
+                          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                          {user.country && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{user.country}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <span className={cn(
+                        'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border shrink-0',
+                        getStatusColor(user.activity_status)
+                      )}>
+                        {user.activity_status}
+                      </span>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-3 gap-3 py-3 border-t border-border">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <FileText className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-sm font-medium">{user.total_bills || 0}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">Bills</p>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm font-medium">{formatBytes(user.storage_used_bytes)}</span>
+                        <p className="text-xs text-muted-foreground mt-1">Storage</p>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm font-medium">
+                          {user.last_login_at
+                            ? new Date(user.last_login_at).toLocaleDateString()
+                            : 'Never'
+                          }
+                        </span>
+                        <p className="text-xs text-muted-foreground mt-1">Last Login</p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-border">
+                      <button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowUserModal(true);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-accent/10 text-accent rounded-lg text-sm font-medium hover:bg-accent/20 transition-colors"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Details
+                      </button>
+                      <button
+                        onClick={() => handleUserAction(user.id, 'suspend')}
+                        disabled={actionLoading === user.id}
+                        className="p-2 hover:bg-yellow-500/20 text-yellow-600 rounded-lg transition-colors"
+                        title="Suspend User"
+                      >
+                        <UserX className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleUserAction(user.id, 'delete')}
+                        disabled={actionLoading === user.id}
+                        className="p-2 hover:bg-destructive/20 text-destructive rounded-lg transition-colors"
+                        title="Delete User"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </>
         )}
       </div>
 
-      {/* User Detail Modal (placeholder) */}
+      {/* User Detail Modal - Mobile Optimized */}
       {showUserModal && selectedUser && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 md:flex md:items-center md:justify-center md:p-4 bg-background/80 backdrop-blur-sm"
           onClick={() => setShowUserModal(false)}
         >
           <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="bg-card border border-border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-auto"
+            initial={{ scale: 0.95, y: "100%" }}
+            animate={{ scale: 1, y: 0 }}
+            className={cn(
+              "bg-card border border-border overflow-auto",
+              // Mobile: full screen
+              "md:rounded-lg md:max-w-2xl md:w-full md:max-h-[80vh]",
+              // Mobile: full screen
+              "h-[100dvh] w-full md:h-auto"
+            )}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">User Details</h2>
-              <button
-                onClick={() => setShowUserModal(false)}
-                className="p-2 hover:bg-muted rounded-lg transition-colors"
-              >
-                ×
-              </button>
+            {/* Mobile Header */}
+            <div className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">User Details</h2>
+                <button
+                  onClick={() => setShowUserModal(false)}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+                >
+                  ×
+                </button>
+              </div>
             </div>
-            <div className="space-y-4">
+
+            {/* Modal Content */}
+            <div className="p-4 md:p-6 space-y-6">
               {/* User Avatar */}
               {selectedUser.avatar_url && (
                 <div className="flex justify-center">
                   <img
                     src={selectedUser.avatar_url}
                     alt={selectedUser.full_name || 'User Avatar'}
-                    className="w-16 h-16 rounded-full border border-border"
+                    className="w-20 h-20 rounded-full border border-border"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
@@ -530,23 +649,24 @@ export default function UsersManagement() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* User Information Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Name</label>
-                  <p className="text-foreground">{selectedUser.full_name || 'Not provided'}</p>
+                  <p className="text-foreground mt-1">{selectedUser.full_name || 'Not provided'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Email</label>
-                  <p className="text-foreground">{selectedUser.email}</p>
+                  <p className="text-foreground mt-1 break-all">{selectedUser.email}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Country</label>
-                  <p className="text-foreground">{selectedUser.country || 'Not provided'}</p>
+                  <p className="text-foreground mt-1">{selectedUser.country || 'Not provided'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>
                   <span className={cn(
-                    'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border',
+                    'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border mt-1',
                     getStatusColor(selectedUser.activity_status)
                   )}>
                     {selectedUser.activity_status}
@@ -554,7 +674,7 @@ export default function UsersManagement() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Login Provider</label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-1">
                     {selectedUser.provider === 'google' && (
                       <>
                         <div className="w-5 h-5 bg-red-500 rounded flex items-center justify-center">
@@ -601,23 +721,23 @@ export default function UsersManagement() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Total Bills</label>
-                  <p className="text-foreground">{selectedUser.total_bills || 0}</p>
+                  <p className="text-foreground mt-1">{selectedUser.total_bills || 0}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Storage Used</label>
-                  <p className="text-foreground">{formatBytes(selectedUser.storage_used_bytes)}</p>
+                  <p className="text-foreground mt-1">{formatBytes(selectedUser.storage_used_bytes)}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Total Spent</label>
-                  <p className="text-foreground">${(selectedUser.total_spent || 0).toLocaleString()}</p>
+                  <p className="text-foreground mt-1">${(selectedUser.total_spent || 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Signup Date</label>
-                  <p className="text-foreground">{new Date(selectedUser.signup_date).toLocaleDateString()}</p>
+                  <p className="text-foreground mt-1">{new Date(selectedUser.signup_date).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Last Login</label>
-                  <p className="text-foreground">
+                  <p className="text-foreground mt-1">
                     {selectedUser.last_login_at
                       ? new Date(selectedUser.last_login_at).toLocaleString()
                       : 'Never'
@@ -626,7 +746,7 @@ export default function UsersManagement() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Email Confirmed</label>
-                  <p className="text-foreground">
+                  <p className="text-foreground mt-1">
                     {selectedUser.email_confirmed_at
                       ? new Date(selectedUser.email_confirmed_at).toLocaleDateString()
                       : 'Not confirmed'
@@ -634,7 +754,30 @@ export default function UsersManagement() {
                   </p>
                 </div>
               </div>
+
+              {/* Action Buttons - Mobile Optimized */}
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
+                <button
+                  onClick={() => handleUserAction(selectedUser.id, 'suspend')}
+                  disabled={actionLoading === selectedUser.id}
+                  className="flex items-center justify-center gap-2 py-3 px-4 bg-yellow-500/10 text-yellow-600 rounded-lg font-medium hover:bg-yellow-500/20 transition-colors touch-manipulation"
+                >
+                  <UserX className="h-4 w-4" />
+                  Suspend User
+                </button>
+                <button
+                  onClick={() => handleUserAction(selectedUser.id, 'delete')}
+                  disabled={actionLoading === selectedUser.id}
+                  className="flex items-center justify-center gap-2 py-3 px-4 bg-destructive/10 text-destructive rounded-lg font-medium hover:bg-destructive/20 transition-colors touch-manipulation"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete User
+                </button>
+              </div>
             </div>
+
+            {/* Safe area bottom padding on mobile */}
+            <div className="h-8 md:hidden" />
           </motion.div>
         </motion.div>
       )}
