@@ -326,87 +326,115 @@ export default function BillsManagement() {
       </div>
 
       {/* Filters */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="lg:col-span-2">
+      <div className="bg-card border border-border rounded-lg p-4 lg:p-6">
+        <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-4 lg:gap-4">
+          {/* Search - Mobile friendly */}
+          <div className="lg:col-span-2 xl:col-span-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2 lg:hidden">
+              Search Bills
+            </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search bills, users, vendors..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Status filter */}
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value as any }))}
-            className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            <option value="all">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="processing">Processing</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 lg:hidden">
+              Processing Status
+            </label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value as any }))}
+              className="w-full px-3 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="all">All Status</option>
+              <option value="completed">Completed</option>
+              <option value="processing">Processing</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
 
           {/* Category filter */}
-          <select
-            value={filters.category}
-            onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-            className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            <option value="all">All Categories</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 lg:hidden">
+              Category
+            </label>
+            <select
+              value={filters.category}
+              onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+              className="w-full px-3 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="all">All Categories</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
 
           {/* Date range filter */}
-          <select
-            value={filters.dateRange}
-            onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value as any }))}
-            className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 lg:hidden">
+              Date Range
+            </label>
+            <select
+              value={filters.dateRange}
+              onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value as any }))}
+              className="w-full px-3 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+            </select>
+          </div>
 
           {/* Warranty filter */}
-          <select
-            value={filters.hasWarranty}
-            onChange={(e) => setFilters(prev => ({ ...prev, hasWarranty: e.target.value as any }))}
-            className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            <option value="all">All Warranty</option>
-            <option value="yes">Has Warranty</option>
-            <option value="no">No Warranty</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 lg:hidden">
+              Warranty Status
+            </label>
+            <select
+              value={filters.hasWarranty}
+              onChange={(e) => setFilters(prev => ({ ...prev, hasWarranty: e.target.value as any }))}
+              className="w-full px-3 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="all">All Warranty</option>
+              <option value="yes">Has Warranty</option>
+              <option value="no">No Warranty</option>
+            </select>
+          </div>
 
           {/* Amount range */}
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="Min amount"
-              value={filters.minAmount}
-              onChange={(e) => setFilters(prev => ({ ...prev, minAmount: e.target.value }))}
-              className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            <input
-              type="number"
-              placeholder="Max amount"
-              value={filters.maxAmount}
-              onChange={(e) => setFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
-              className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-            />
+          <div className="lg:col-span-2 xl:col-span-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-2 lg:hidden">
+              Amount Range
+            </label>
+            <div className="flex gap-3">
+              <input
+                type="number"
+                placeholder="Min amount"
+                value={filters.minAmount}
+                onChange={(e) => setFilters(prev => ({ ...prev, minAmount: e.target.value }))}
+                className="w-full px-3 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+              <input
+                type="number"
+                placeholder="Max amount"
+                value={filters.maxAmount}
+                onChange={(e) => setFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
+                className="w-full px-3 py-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -427,7 +455,7 @@ export default function BillsManagement() {
         </div>
       )}
 
-      {/* Bills Table */}
+      {/* Bills Table/Cards */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
@@ -435,74 +463,236 @@ export default function BillsManagement() {
             <p className="text-muted-foreground">Loading bills...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 border-b border-border">
-                <tr>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Bill</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">User</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Amount</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">File</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBills.length === 0 ? (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                      <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      {Object.values(filters).some(f => f !== 'all' && f !== '')
-                        ? 'No bills match your filters'
-                        : 'No bills found'
-                      }
-                    </td>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Bill</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">User</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Amount</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Date</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">File</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
                   </tr>
-                ) : (
-                  filteredBills.map((bill) => (
-                    <motion.tr
+                </thead>
+                <tbody>
+                  {filteredBills.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-muted-foreground">
+                        <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        {Object.values(filters).some(f => f !== 'all' && f !== '')
+                          ? 'No bills match your filters'
+                          : 'No bills found'
+                        }
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBills.map((bill) => (
+                      <motion.tr
+                        key={bill.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-border hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            {bill.thumbnail_url ? (
+                              <img
+                                src={bill.thumbnail_url}
+                                alt="Bill thumbnail"
+                                className="w-10 h-10 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-accent/20 rounded flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-accent" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground truncate">
+                                {bill.title}
+                              </p>
+                              {bill.vendor && (
+                                <p className="text-sm text-muted-foreground truncate">
+                                  {bill.vendor}
+                                </p>
+                              )}
+                              {bill.category && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <Tag className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">{bill.category}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">
+                                {bill.user_full_name || bill.user_email.split('@')[0]}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {bill.user_email}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">
+                              {formatCurrency(bill.total_amount, bill.currency)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
+                              getStatusColor(bill.processing_status)
+                            )}>
+                              {getStatusIcon(bill.processing_status)}
+                              {bill.processing_status}
+                            </span>
+                            {bill.has_warranty && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-500">
+                                W
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-foreground">
+                              {new Date(bill.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1">
+                            <Image className="h-4 w-4 text-muted-foreground" />
+                            <div className="text-sm">
+                              <p className="text-foreground">{bill.file_type}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatFileSize(bill.file_size)}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleBillAction(bill.id, 'view')}
+                              disabled={actionLoading === bill.id}
+                              className="p-1 hover:bg-accent/20 rounded transition-colors"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
+                            </button>
+                            <button
+                              onClick={() => handleBillAction(bill.id, 'download')}
+                              disabled={actionLoading === bill.id || !bill.file_url}
+                              className="p-1 hover:bg-blue-500/20 rounded transition-colors"
+                              title="Download File"
+                            >
+                              <Download className="h-4 w-4 text-muted-foreground hover:text-blue-500" />
+                            </button>
+                            <button
+                              onClick={() => handleBillAction(bill.id, 'archive')}
+                              disabled={actionLoading === bill.id}
+                              className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
+                              title="Archive Bill"
+                            >
+                              <Archive className="h-4 w-4 text-muted-foreground hover:text-yellow-500" />
+                            </button>
+                            <button
+                              onClick={() => handleBillAction(bill.id, 'delete')}
+                              disabled={actionLoading === bill.id}
+                              className="p-1 hover:bg-destructive/20 rounded transition-colors"
+                              title="Delete Bill"
+                            >
+                              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden">
+              {filteredBills.length === 0 ? (
+                <div className="text-center py-12 px-4 text-muted-foreground">
+                  <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg mb-2">
+                    {Object.values(filters).some(f => f !== 'all' && f !== '')
+                      ? 'No bills match your filters'
+                      : 'No bills found'
+                    }
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {filteredBills.map((bill) => (
+                    <motion.div
                       key={bill.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="border-b border-border hover:bg-muted/30 transition-colors"
+                      className="p-4 space-y-3"
                     >
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          {bill.thumbnail_url ? (
-                            <img
-                              src={bill.thumbnail_url}
-                              alt="Bill thumbnail"
-                              className="w-10 h-10 rounded object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-accent/20 rounded flex items-center justify-center">
-                              <FileText className="h-5 w-5 text-accent" />
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-medium text-foreground truncate">
-                              {bill.title}
+                      {/* Bill Header */}
+                      <div className="flex items-start gap-3">
+                        {bill.thumbnail_url ? (
+                          <img
+                            src={bill.thumbnail_url}
+                            alt="Bill thumbnail"
+                            className="w-12 h-12 rounded object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-accent/20 rounded flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-6 w-6 text-accent" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base text-foreground truncate">
+                            {bill.title}
+                          </h3>
+                          {bill.vendor && (
+                            <p className="text-sm text-muted-foreground truncate">
+                              {bill.vendor}
                             </p>
-                            {bill.vendor && (
-                              <p className="text-sm text-muted-foreground truncate">
-                                {bill.vendor}
-                              </p>
-                            )}
-                            {bill.category && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <Tag className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">{bill.category}</span>
-                              </div>
+                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={cn(
+                              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border',
+                              getStatusColor(bill.processing_status)
+                            )}>
+                              {getStatusIcon(bill.processing_status)}
+                              {bill.processing_status}
+                            </span>
+                            {bill.has_warranty && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-500">
+                                Warranty
+                              </span>
                             )}
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-4">
+                      </div>
+
+                      {/* Bill Details */}
+                      <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
+                          <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
+                            <p className="font-medium text-foreground truncate">
                               {bill.user_full_name || bill.user_email.split('@')[0]}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">
@@ -510,92 +700,82 @@ export default function BillsManagement() {
                             </p>
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium text-foreground">
                             {formatCurrency(bill.total_amount, bill.currency)}
                           </span>
                         </div>
-                      </td>
-                      <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <span className={cn(
-                            'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
-                            getStatusColor(bill.processing_status)
-                          )}>
-                            {getStatusIcon(bill.processing_status)}
-                            {bill.processing_status}
-                          </span>
-                          {bill.has_warranty && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-500">
-                              W
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-foreground">
+                          <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-foreground">
                             {new Date(bill.date).toLocaleDateString()}
                           </span>
                         </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <Image className="h-4 w-4 text-muted-foreground" />
-                          <div className="text-sm">
+                        <div className="flex items-center gap-2">
+                          <Image className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <div>
                             <p className="text-foreground">{bill.file_type}</p>
                             <p className="text-xs text-muted-foreground">
                               {formatFileSize(bill.file_size)}
                             </p>
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleBillAction(bill.id, 'view')}
-                            disabled={actionLoading === bill.id}
-                            className="p-1 hover:bg-accent/20 rounded transition-colors"
-                            title="View Details"
-                          >
-                            <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                          </button>
-                          <button
-                            onClick={() => handleBillAction(bill.id, 'download')}
-                            disabled={actionLoading === bill.id || !bill.file_url}
-                            className="p-1 hover:bg-blue-500/20 rounded transition-colors"
-                            title="Download File"
-                          >
-                            <Download className="h-4 w-4 text-muted-foreground hover:text-blue-500" />
-                          </button>
-                          <button
-                            onClick={() => handleBillAction(bill.id, 'archive')}
-                            disabled={actionLoading === bill.id}
-                            className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
-                            title="Archive Bill"
-                          >
-                            <Archive className="h-4 w-4 text-muted-foreground hover:text-yellow-500" />
-                          </button>
-                          <button
-                            onClick={() => handleBillAction(bill.id, 'delete')}
-                            disabled={actionLoading === bill.id}
-                            className="p-1 hover:bg-destructive/20 rounded transition-colors"
-                            title="Delete Bill"
-                          >
-                            <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                          </button>
+                      </div>
+
+                      {/* Category and Tags */}
+                      {(bill.category || (bill.tags && bill.tags.length > 0)) && (
+                        <div className="space-y-2">
+                          {bill.category && (
+                            <div className="flex items-center gap-1">
+                              <Tag className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{bill.category}</span>
+                            </div>
+                          )}
                         </div>
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 pt-2">
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'view')}
+                          disabled={actionLoading === bill.id}
+                          className="flex items-center gap-1 px-3 py-2 text-sm bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors disabled:opacity-50"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'download')}
+                          disabled={actionLoading === bill.id || !bill.file_url}
+                          className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download
+                        </button>
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'archive')}
+                          disabled={actionLoading === bill.id}
+                          className="flex items-center gap-1 px-3 py-2 text-sm bg-yellow-500/10 text-yellow-500 rounded-lg hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
+                        >
+                          <Archive className="h-4 w-4" />
+                          Archive
+                        </button>
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'delete')}
+                          disabled={actionLoading === bill.id}
+                          className="flex items-center gap-1 px-3 py-2 text-sm bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20 transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -604,167 +784,184 @@ export default function BillsManagement() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm lg:p-4"
           onClick={() => setShowBillModal(false)}
         >
           <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="bg-card border border-border rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-card border border-border rounded-none lg:rounded-lg w-full h-full lg:w-auto lg:h-auto lg:max-w-4xl lg:max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Bill Details</h2>
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-card border-b border-border p-4 lg:p-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-foreground">Bill Details</h2>
               <button
                 onClick={() => setShowBillModal(false)}
-                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                className="p-2 hover:bg-muted rounded-lg transition-colors text-2xl lg:text-base"
               >
                 ×
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Bill Information */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Title</label>
-                    <p className="text-foreground">{selectedBill.title}</p>
+            {/* Modal Content */}
+            <div className="p-4 lg:p-6">
+              <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+                {/* Bill Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-foreground lg:hidden">Information</h3>
+                  <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Title</label>
+                      <p className="text-base text-foreground">{selectedBill.title}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Amount</label>
+                      <p className="text-base text-foreground font-medium">
+                        {formatCurrency(selectedBill.total_amount, selectedBill.currency)}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Vendor</label>
+                      <p className="text-base text-foreground">{selectedBill.vendor || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Category</label>
+                      <p className="text-base text-foreground">{selectedBill.category || 'Uncategorized'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Date</label>
+                      <p className="text-base text-foreground">
+                        {new Date(selectedBill.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Status</label>
+                      <span className={cn(
+                        'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border',
+                        getStatusColor(selectedBill.processing_status)
+                      )}>
+                        {getStatusIcon(selectedBill.processing_status)}
+                        {selectedBill.processing_status}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Amount</label>
-                    <p className="text-foreground">
-                      {formatCurrency(selectedBill.total_amount, selectedBill.currency)}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Vendor</label>
-                    <p className="text-foreground">{selectedBill.vendor || 'Not specified'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Category</label>
-                    <p className="text-foreground">{selectedBill.category || 'Uncategorized'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Date</label>
-                    <p className="text-foreground">
-                      {new Date(selectedBill.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Status</label>
-                    <span className={cn(
-                      'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
-                      getStatusColor(selectedBill.processing_status)
-                    )}>
-                      {getStatusIcon(selectedBill.processing_status)}
-                      {selectedBill.processing_status}
-                    </span>
-                  </div>
-                </div>
 
-                {selectedBill.description && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Description</label>
-                    <p className="text-foreground">{selectedBill.description}</p>
-                  </div>
-                )}
+                  {selectedBill.description && (
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
+                      <p className="text-base text-foreground bg-muted/30 p-3 rounded-lg">{selectedBill.description}</p>
+                    </div>
+                  )}
 
-                {selectedBill.has_warranty && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Warranty</label>
-                    <p className="text-foreground">
-                      Expires: {selectedBill.warranty_expires_on
-                        ? new Date(selectedBill.warranty_expires_on).toLocaleDateString()
-                        : 'Not specified'
-                      }
-                    </p>
-                  </div>
-                )}
+                  {selectedBill.has_warranty && (
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Warranty</label>
+                      <p className="text-base text-foreground">
+                        Expires: {selectedBill.warranty_expires_on
+                          ? new Date(selectedBill.warranty_expires_on).toLocaleDateString()
+                          : 'Not specified'
+                        }
+                      </p>
+                    </div>
+                  )}
 
-                {selectedBill.tags && selectedBill.tags.length > 0 && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Tags</label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedBill.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-accent/20 text-accent text-xs rounded"
-                        >
-                          {tag}
+                  {selectedBill.tags && selectedBill.tags.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">Tags</label>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedBill.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-accent/20 text-accent text-sm rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* User Information */}
+                  <div className="pt-4 border-t border-border">
+                    <h4 className="text-base font-medium text-foreground mb-3">User Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground text-sm">Name:</span>
+                        <span className="text-foreground font-medium">
+                          {selectedBill.user_full_name || 'Not provided'}
                         </span>
-                      ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground text-sm">Email:</span>
+                        <span className="text-foreground">
+                          {selectedBill.user_email}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
 
-                {/* User Information */}
-                <div className="pt-4 border-t border-border">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">User Information</h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    <p className="text-foreground">
-                      <span className="text-muted-foreground">Name: </span>
-                      {selectedBill.user_full_name || 'Not provided'}
-                    </p>
-                    <p className="text-foreground">
-                      <span className="text-muted-foreground">Email: </span>
-                      {selectedBill.user_email}
-                    </p>
-                  </div>
+                {/* File Preview */}
+                <div>
+                  <h3 className="text-lg font-medium text-foreground mb-3 lg:hidden">File Preview</h3>
+                  <label className="hidden lg:block text-sm font-medium text-muted-foreground mb-2">File Preview</label>
+                  {selectedBill.thumbnail_url ? (
+                    <div>
+                      <img
+                        src={selectedBill.thumbnail_url}
+                        alt="Bill document"
+                        className="w-full max-w-md mx-auto lg:mx-0 rounded-lg border border-border"
+                      />
+                      <div className="mt-3 text-sm text-muted-foreground">
+                        <p>Type: {selectedBill.file_type}</p>
+                        <p>Size: {formatFileSize(selectedBill.file_size)}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-8 lg:p-12 border-2 border-dashed border-border rounded-lg text-center">
+                      <FileText className="h-16 w-16 lg:h-12 lg:w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                      <p className="text-muted-foreground">No preview available</p>
+                      {selectedBill.file_type && (
+                        <p className="text-sm text-muted-foreground mt-1">{selectedBill.file_type}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* File Preview */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">File Preview</label>
-                {selectedBill.thumbnail_url ? (
-                  <div className="mt-2">
-                    <img
-                      src={selectedBill.thumbnail_url}
-                      alt="Bill document"
-                      className="w-full max-w-md rounded-lg border border-border"
-                    />
-                    <div className="mt-2 text-sm text-muted-foreground">
-                      <p>Type: {selectedBill.file_type}</p>
-                      <p>Size: {formatFileSize(selectedBill.file_size)}</p>
-                    </div>
+              {/* OCR Text */}
+              {selectedBill.ocr_text && (
+                <div className="mt-6 pt-4 border-t border-border">
+                  <h4 className="text-base font-medium text-foreground mb-3">Extracted Text (OCR)</h4>
+                  <div className="p-4 bg-muted/50 rounded-lg max-h-48 overflow-y-auto">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
+                      {selectedBill.ocr_text}
+                    </p>
                   </div>
-                ) : (
-                  <div className="mt-2 p-8 border-2 border-dashed border-border rounded-lg text-center">
-                    <FileText className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground">No preview available</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* OCR Text */}
-            {selectedBill.ocr_text && (
-              <div className="mt-6 pt-4 border-t border-border">
-                <label className="text-sm font-medium text-muted-foreground">Extracted Text (OCR)</label>
-                <div className="mt-2 p-3 bg-muted/50 rounded-lg">
-                  <p className="text-sm text-foreground whitespace-pre-wrap">
-                    {selectedBill.ocr_text}
-                  </p>
-                </div>
-              </div>
-            )}
-
             {/* Action Buttons */}
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                onClick={() => selectedBill.file_url && handleBillAction(selectedBill.id, 'download')}
-                disabled={!selectedBill.file_url}
-                className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50"
-              >
-                Download File
-              </button>
-              <button
-                onClick={() => setShowBillModal(false)}
-                className="px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
-              >
-                Close
-              </button>
+            <div className="sticky bottom-0 bg-card border-t border-border p-4 lg:p-6">
+              <div className="flex flex-col gap-3 lg:flex-row lg:justify-end lg:gap-2">
+                <button
+                  onClick={() => selectedBill.file_url && handleBillAction(selectedBill.id, 'download')}
+                  disabled={!selectedBill.file_url}
+                  className="w-full lg:w-auto px-6 py-3 lg:py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 font-medium"
+                >
+                  Download File
+                </button>
+                <button
+                  onClick={() => setShowBillModal(false)}
+                  className="w-full lg:w-auto px-6 py-3 lg:py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>

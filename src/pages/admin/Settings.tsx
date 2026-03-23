@@ -269,85 +269,96 @@ export default function Settings() {
 
   const renderAuthenticationSettings = () => (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={settings.enableGoogleAuth}
-              onChange={(e) => updateSetting('enableGoogleAuth', e.target.checked)}
-              className="rounded border-border"
-            />
-            Enable Google Authentication
-          </label>
-        </div>
-        <div>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={settings.enableGithubAuth}
-              onChange={(e) => updateSetting('enableGithubAuth', e.target.checked)}
-              className="rounded border-border"
-            />
-            Enable GitHub Authentication
-          </label>
+      {/* Social Auth Options */}
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-foreground">Social Authentication</h4>
+        <div className="space-y-3 lg:flex lg:items-center lg:gap-6 lg:space-y-0">
+          <div>
+            <label className="flex items-center gap-3 p-3 lg:p-0 bg-muted/30 lg:bg-transparent rounded-lg lg:rounded-none cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.enableGoogleAuth}
+                onChange={(e) => updateSetting('enableGoogleAuth', e.target.checked)}
+                className="h-5 w-5 lg:h-4 lg:w-4 rounded border-border"
+              />
+              <span className="text-base lg:text-sm font-medium">Enable Google Authentication</span>
+            </label>
+          </div>
+          <div>
+            <label className="flex items-center gap-3 p-3 lg:p-0 bg-muted/30 lg:bg-transparent rounded-lg lg:rounded-none cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.enableGithubAuth}
+                onChange={(e) => updateSetting('enableGithubAuth', e.target.checked)}
+                className="h-5 w-5 lg:h-4 lg:w-4 rounded border-border"
+              />
+              <span className="text-base lg:text-sm font-medium">Enable GitHub Authentication</span>
+            </label>
+          </div>
         </div>
       </div>
 
+      {/* Email Verification */}
       <div>
-        <label className="flex items-center gap-2 mb-2">
+        <label className="flex items-start gap-3 p-3 lg:p-0 bg-muted/30 lg:bg-transparent rounded-lg lg:rounded-none cursor-pointer">
           <input
             type="checkbox"
             checked={settings.requireEmailVerification}
             onChange={(e) => updateSetting('requireEmailVerification', e.target.checked)}
-            className="rounded border-border"
+            className="h-5 w-5 lg:h-4 lg:w-4 rounded border-border mt-0.5"
           />
-          Require Email Verification
+          <div>
+            <span className="text-base lg:text-sm font-medium block">Require Email Verification</span>
+            <p className="text-sm text-muted-foreground mt-1">Users must verify their email before accessing the application</p>
+          </div>
         </label>
-        <p className="text-sm text-muted-foreground">Users must verify their email before accessing the application</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Minimum Password Length
-          </label>
-          <input
-            type="number"
-            min="6"
-            max="128"
-            value={settings.passwordMinLength}
-            onChange={(e) => updateSetting('passwordMinLength', parseInt(e.target.value))}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
+      {/* Number Inputs */}
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-foreground">Security Parameters</h4>
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              Minimum Password Length
+            </label>
+            <input
+              type="number"
+              min="6"
+              max="128"
+              value={settings.passwordMinLength}
+              onChange={(e) => updateSetting('passwordMinLength', parseInt(e.target.value))}
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Session Timeout (hours)
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="168"
-            value={settings.sessionTimeout}
-            onChange={(e) => updateSetting('sessionTimeout', parseInt(e.target.value))}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              Session Timeout (hours)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="168"
+              value={settings.sessionTimeout}
+              onChange={(e) => updateSetting('sessionTimeout', parseInt(e.target.value))}
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Max Login Attempts
-          </label>
-          <input
-            type="number"
-            min="3"
-            max="20"
-            value={settings.maxLoginAttempts}
-            onChange={(e) => updateSetting('maxLoginAttempts', parseInt(e.target.value))}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          />
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              Max Login Attempts
+            </label>
+            <input
+              type="number"
+              min="3"
+              max="20"
+              value={settings.maxLoginAttempts}
+              onChange={(e) => updateSetting('maxLoginAttempts', parseInt(e.target.value))}
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -355,38 +366,43 @@ export default function Settings() {
 
   const renderFileSettings = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Max File Size (MB)
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="100"
-            value={settings.maxFileSize}
-            onChange={(e) => updateSetting('maxFileSize', parseInt(e.target.value))}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
+      {/* Numeric Settings */}
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-foreground">Upload Limits</h4>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              Max File Size (MB)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={settings.maxFileSize}
+              onChange={(e) => updateSetting('maxFileSize', parseInt(e.target.value))}
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Compression Quality (%)
-          </label>
-          <input
-            type="number"
-            min="10"
-            max="100"
-            value={settings.compressionQuality}
-            onChange={(e) => updateSetting('compressionQuality', parseInt(e.target.value))}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          />
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              Compression Quality (%)
+            </label>
+            <input
+              type="number"
+              min="10"
+              max="100"
+              value={settings.compressionQuality}
+              onChange={(e) => updateSetting('compressionQuality', parseInt(e.target.value))}
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
         </div>
       </div>
 
+      {/* File Types */}
       <div>
-        <label className="block text-sm font-medium text-muted-foreground mb-2">
+        <label className="block text-sm font-medium text-muted-foreground mb-3">
           Allowed File Types
         </label>
         <input
@@ -394,84 +410,97 @@ export default function Settings() {
           value={settings.allowedFileTypes.join(', ')}
           onChange={(e) => updateArraySetting('allowedFileTypes', e.target.value)}
           placeholder="pdf, jpg, jpeg, png, tiff"
-          className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+          className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
         />
-        <p className="text-sm text-muted-foreground mt-1">Comma-separated list of allowed file extensions</p>
+        <p className="text-sm text-muted-foreground mt-2">Comma-separated list of allowed file extensions</p>
       </div>
 
+      {/* Thumbnail Setting */}
       <div>
-        <label className="flex items-center gap-2">
+        <label className="flex items-start gap-3 p-3 lg:p-0 bg-muted/30 lg:bg-transparent rounded-lg lg:rounded-none cursor-pointer">
           <input
             type="checkbox"
             checked={settings.enableThumbnails}
             onChange={(e) => updateSetting('enableThumbnails', e.target.checked)}
-            className="rounded border-border"
+            className="h-5 w-5 lg:h-4 lg:w-4 rounded border-border mt-0.5"
           />
-          Generate Thumbnails
+          <div>
+            <span className="text-base lg:text-sm font-medium block">Generate Thumbnails</span>
+            <p className="text-sm text-muted-foreground mt-1">Automatically generate thumbnails for uploaded images</p>
+          </div>
         </label>
-        <p className="text-sm text-muted-foreground mt-1">Automatically generate thumbnails for uploaded images</p>
       </div>
     </div>
   );
 
   const renderOCRSettings = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            OCR Provider
-          </label>
-          <select
-            value={settings.ocrProvider}
-            onChange={(e) => updateSetting('ocrProvider', e.target.value as 'tesseract' | 'google' | 'aws')}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            <option value="tesseract">Tesseract</option>
-            <option value="google">Google Vision</option>
-            <option value="aws">AWS Textract</option>
-          </select>
-        </div>
+      {/* OCR Configuration */}
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-foreground">OCR Configuration</h4>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              OCR Provider
+            </label>
+            <select
+              value={settings.ocrProvider}
+              onChange={(e) => updateSetting('ocrProvider', e.target.value as 'tesseract' | 'google' | 'aws')}
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="tesseract">Tesseract (Free)</option>
+              <option value="google">Google Vision (Paid)</option>
+              <option value="aws">AWS Textract (Paid)</option>
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            OCR Language
-          </label>
-          <input
-            type="text"
-            value={settings.ocrLanguage}
-            onChange={(e) => updateSetting('ocrLanguage', e.target.value)}
-            placeholder="eng"
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-          />
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              OCR Language
+            </label>
+            <input
+              type="text"
+              value={settings.ocrLanguage}
+              onChange={(e) => updateSetting('ocrLanguage', e.target.value)}
+              placeholder="eng"
+              className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
         </div>
+      </div>
 
+      {/* Processing Settings */}
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-foreground">Processing Settings</h4>
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
+          <label className="block text-sm font-medium text-muted-foreground mb-3">
             Extraction Quality
           </label>
           <select
             value={settings.extractionQuality}
             onChange={(e) => updateSetting('extractionQuality', e.target.value as 'fast' | 'balanced' | 'accurate')}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full px-4 py-3 lg:px-3 lg:py-2 bg-background border border-border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           >
-            <option value="fast">Fast</option>
-            <option value="balanced">Balanced</option>
-            <option value="accurate">Accurate</option>
+            <option value="fast">Fast (Lower accuracy, faster processing)</option>
+            <option value="balanced">Balanced (Good accuracy and speed)</option>
+            <option value="accurate">Accurate (Best accuracy, slower processing)</option>
           </select>
         </div>
-      </div>
 
-      <div>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={settings.enableAutoExtraction}
-            onChange={(e) => updateSetting('enableAutoExtraction', e.target.checked)}
-            className="rounded border-border"
-          />
-          Enable Auto-Extraction
-        </label>
-        <p className="text-sm text-muted-foreground mt-1">Automatically extract text and data from uploaded documents</p>
+        <div>
+          <label className="flex items-start gap-3 p-3 lg:p-0 bg-muted/30 lg:bg-transparent rounded-lg lg:rounded-none cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.enableAutoExtraction}
+              onChange={(e) => updateSetting('enableAutoExtraction', e.target.checked)}
+              className="h-5 w-5 lg:h-4 lg:w-4 rounded border-border mt-0.5"
+            />
+            <div>
+              <span className="text-base lg:text-sm font-medium block">Enable Auto Extraction</span>
+              <p className="text-sm text-muted-foreground mt-1">Automatically extract text from uploaded documents</p>
+            </div>
+          </label>
+        </div>
       </div>
     </div>
   );
@@ -900,44 +929,49 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">System Settings</h1>
-          <p className="text-muted-foreground">
-            Configure system-wide settings and preferences
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {unsavedChanges && (
-            <span className="text-sm text-yellow-500 flex items-center gap-1">
-              <AlertTriangle className="h-4 w-4" />
-              Unsaved changes
-            </span>
-          )}
-          <button
-            onClick={resetSettings}
-            className="p-2 hover:bg-destructive/20 rounded-lg transition-colors text-destructive"
-            title="Reset to Defaults"
-          >
-            <RotateCcw className="h-5 w-5" />
-          </button>
-          <button
-            onClick={saveSettings}
-            disabled={saving || !unsavedChanges}
-            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50"
-          >
-            {saving ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">System Settings</h1>
+            <p className="text-muted-foreground text-base lg:text-sm">
+              Configure system-wide settings and preferences
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {unsavedChanges && (
+              <span className="text-sm text-yellow-500 flex items-center gap-2 px-3 py-2 bg-yellow-500/10 rounded-lg">
+                <AlertTriangle className="h-4 w-4" />
+                Unsaved changes
+              </span>
             )}
-          </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={resetSettings}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 lg:p-2 hover:bg-destructive/20 rounded-lg transition-colors text-destructive"
+                title="Reset to Defaults"
+              >
+                <RotateCcw className="h-5 w-5" />
+                <span className="sm:hidden">Reset</span>
+              </button>
+              <button
+                onClick={saveSettings}
+                disabled={saving || !unsavedChanges}
+                className="flex-1 sm:flex-none px-6 py-3 lg:px-4 lg:py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 font-medium text-base lg:text-sm"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-5 w-5 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -950,9 +984,38 @@ export default function Settings() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Settings Navigation */}
-        <div className="lg:col-span-1">
+      <div className="space-y-6 lg:grid lg:grid-cols-4 lg:gap-6 lg:space-y-0">
+        {/* Mobile Settings Navigation */}
+        <div className="lg:hidden">
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-foreground mb-3">Settings Categories</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {settingsSections.map((section) => {
+                const Icon = section.icon;
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-lg text-center transition-colors min-h-[80px]",
+                      activeSection === section.id
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
+                    <span className="text-xs font-medium leading-tight">
+                      {section.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Settings Navigation */}
+        <div className="hidden lg:block lg:col-span-1">
           <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="text-lg font-semibold text-foreground mb-4">Settings Categories</h3>
             <nav className="space-y-2">
@@ -969,10 +1032,10 @@ export default function Settings() {
                         : "hover:bg-muted text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    <Icon className="h-5 w-5" />
-                    <div>
-                      <p className="font-medium">{section.title}</p>
-                      <p className="text-xs opacity-80">{section.description}</p>
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{section.title}</p>
+                      <p className="text-xs opacity-80 truncate">{section.description}</p>
                     </div>
                   </button>
                 );
@@ -987,18 +1050,18 @@ export default function Settings() {
             key={activeSection}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-border rounded-lg p-6"
+            className="bg-card border border-border rounded-lg p-4 lg:p-6"
           >
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-start gap-3 mb-6">
               {React.createElement(
                 settingsSections.find(s => s.id === activeSection)?.icon || SettingsIcon,
-                { className: "h-6 w-6 text-accent" }
+                { className: "h-6 w-6 lg:h-7 lg:w-7 text-accent flex-shrink-0 mt-1" }
               )}
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">
+              <div className="min-w-0">
+                <h2 className="text-xl lg:text-2xl font-semibold text-foreground">
                   {settingsSections.find(s => s.id === activeSection)?.title}
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-base lg:text-sm mt-1">
                   {settingsSections.find(s => s.id === activeSection)?.description}
                 </p>
               </div>

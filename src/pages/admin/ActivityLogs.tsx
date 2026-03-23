@@ -21,7 +21,8 @@ import {
   Clock,
   Globe,
   Database,
-  Download
+  Download,
+  Eye
 } from 'lucide-react';
 import { supabase } from '@/services/supabase';
 import { cn } from '@/utils/cn';
@@ -533,9 +534,10 @@ export default function ActivityLogs() {
                     <td className="py-3 px-4">
                       <button
                         onClick={() => viewLogDetails(log)}
-                        className="text-sm text-accent hover:text-accent/80 underline"
+                        className="p-2 text-accent hover:text-accent/80 hover:bg-accent/10 rounded-lg transition-colors"
+                        title="View Details"
                       >
-                        View Details
+                        <Eye className="h-4 w-4" />
                       </button>
                     </td>
                   </motion.tr>

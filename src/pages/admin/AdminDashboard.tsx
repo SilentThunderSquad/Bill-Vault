@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Users,
   FileText,
@@ -28,6 +29,66 @@ interface SystemMetrics {
   notificationsToday: number;
 }
 
+interface RecentActivity {
+  id: string;
+  action: string;
+  user_email: string;
+  timestamp: string;
+  details?: string;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return {
+      hasError: true,
+      error
+    };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Dashboard Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="max-w-md w-full bg-card border border-border rounded-lg p-6 text-center">
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              Something went wrong
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              An error occurred while loading the admin dashboard. Please try refreshing the page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 interface StatCardProps {
   title: string;
   value: string | number;
@@ -48,6 +109,21 @@ function StatCard({ title, value, change, changeLabel, icon: Icon, color = 'defa
 
   const changeColor = change && change > 0 ? 'text-green-500' : change && change < 0 ? 'text-red-500' : 'text-muted-foreground';
 
+  // Safely format the value to ensure it's a string or number
+  const safeValue = React.useMemo(() => {
+    if (loading) return 0;
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'object') return 0;
+    return value;
+  }, [value, loading]);
+
+  // Safely format the change value
+  const safeChange = React.useMemo(() => {
+    if (change === null || change === undefined) return undefined;
+    if (typeof change === 'object') return undefined;
+    return Number(change);
+  }, [change]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -60,23 +136,25 @@ function StatCard({ title, value, change, changeLabel, icon: Icon, color = 'defa
             <div className={cn('p-2 rounded-lg', colorClasses[color])}>
               <Icon className="h-5 w-5" />
             </div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-sm font-medium text-muted-foreground">{String(title)}</p>
           </div>
           <div className="space-y-1">
             {loading ? (
               <div className="h-8 w-24 bg-muted animate-pulse rounded" />
             ) : (
-              <p className="text-2xl font-bold text-foreground">{value.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-foreground">
+                {typeof safeValue === 'string' ? safeValue : safeValue.toLocaleString()}
+              </p>
             )}
-            {change !== undefined && changeLabel && !loading && (
+            {safeChange !== undefined && changeLabel && !loading && (
               <div className="flex items-center gap-1">
-                {change > 0 ? (
+                {safeChange > 0 ? (
                   <ArrowUpIcon className={cn('h-3 w-3', changeColor)} />
-                ) : change < 0 ? (
+                ) : safeChange < 0 ? (
                   <ArrowDownIcon className={cn('h-3 w-3', changeColor)} />
                 ) : null}
                 <span className={cn('text-xs font-medium', changeColor)}>
-                  {change > 0 ? '+' : ''}{change}% {changeLabel}
+                  {safeChange > 0 ? '+' : ''}{safeChange}% {String(changeLabel)}
                 </span>
               </div>
             )}
@@ -87,13 +165,17 @@ function StatCard({ title, value, change, changeLabel, icon: Icon, color = 'defa
   );
 }
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadSystemMetrics();
+    loadRecentActivities();
   }, []);
 
   const loadSystemMetrics = async () => {
@@ -101,14 +183,42 @@ export default function AdminDashboard() {
       setLoading(true);
       setError(null);
 
-      // Fetch system overview metrics
-      const { data: systemOverview, error: overviewError } = await supabase
+      // Try to fetch system overview metrics
+      let { data: systemOverview, error: overviewError } = await supabase
         .from('admin_system_overview')
         .select('*')
         .single();
 
-      if (overviewError) {
-        throw overviewError;
+      // If admin_system_overview doesn't exist, try to calculate from other tables
+      if (overviewError && overviewError.code === '42P01') {
+        console.log('admin_system_overview table not found, calculating metrics from individual tables');
+
+        // Calculate metrics from individual admin views
+        const [
+          { data: users, error: usersError },
+          { data: bills, error: billsError }
+        ] = await Promise.all([
+          supabase.from('admin_user_overview').select('*'),
+          supabase.from('admin_bills_overview').select('*')
+        ]);
+
+        if (!usersError && !billsError) {
+          const now = new Date();
+          const today = now.toDateString();
+          const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          const thisMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+          systemOverview = {
+            total_users: users?.length || 0,
+            active_users: users?.filter(u => u.activity_status === 'active').length || 0,
+            total_bills: bills?.length || 0,
+            bills_today: bills?.filter(b => new Date(b.created_at).toDateString() === today).length || 0,
+            bills_week: bills?.filter(b => new Date(b.created_at) >= thisWeek).length || 0,
+            bills_month: bills?.filter(b => new Date(b.created_at) >= thisMonth).length || 0,
+            total_storage_used: bills?.length * 2 * 1024 * 1024 || 0, // Estimate 2MB per bill
+            notifications_today: 0
+          };
+        }
       }
 
       if (systemOverview) {
@@ -122,12 +232,72 @@ export default function AdminDashboard() {
           storageUsed: systemOverview.total_storage_used || 0,
           notificationsToday: systemOverview.notifications_today || 0
         });
+      } else {
+        // Fallback to default values if all queries fail
+        setMetrics({
+          totalUsers: 0,
+          activeUsers: 0,
+          totalBills: 0,
+          billsToday: 0,
+          billsThisWeek: 0,
+          billsThisMonth: 0,
+          storageUsed: 0,
+          notificationsToday: 0
+        });
       }
     } catch (err) {
       console.error('Error loading system metrics:', err);
       setError('Failed to load system metrics');
+      // Set default values even on error to prevent crashes
+      setMetrics({
+        totalUsers: 0,
+        activeUsers: 0,
+        totalBills: 0,
+        billsToday: 0,
+        billsThisWeek: 0,
+        billsThisMonth: 0,
+        storageUsed: 0,
+        notificationsToday: 0
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRecentActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+
+      // First, try to get the correct column structure
+      const { data: activities, error: activitiesError } = await supabase
+        .from('admin_activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      console.log('Recent activities query result:', { activities, activitiesError });
+
+      if (activitiesError) {
+        console.error('Error loading recent activities:', activitiesError);
+        setRecentActivities([]);
+      } else if (activities && activities.length > 0) {
+        // Map the activities to ensure consistent structure
+        const formattedActivities = activities.map((activity, index) => ({
+          id: activity.id || `activity-${index}`,
+          action: activity.action || activity.title || 'Unknown action',
+          user_email: activity.admin_email || activity.user_email || activity.email || 'Unknown user',
+          timestamp: activity.created_at || activity.timestamp || new Date().toISOString(),
+          details: activity.details || activity.description || null
+        }));
+        setRecentActivities(formattedActivities);
+      } else {
+        setRecentActivities([]);
+      }
+    } catch (err) {
+      console.error('Error loading recent activities:', err);
+      setRecentActivities([]);
+    } finally {
+      setActivitiesLoading(false);
     }
   };
 
@@ -140,6 +310,36 @@ export default function AdminDashboard() {
 
   const calculatePercentage = (value: number, total: number) => {
     return total > 0 ? Math.round((value / total) * 100) : 0;
+  };
+
+  const formatTimeAgo = (timestamp: string) => {
+    try {
+      if (!timestamp) return 'Unknown';
+
+      const now = new Date();
+      const time = new Date(timestamp);
+
+      // Check if the date is valid
+      if (isNaN(time.getTime())) {
+        return 'Unknown';
+      }
+
+      const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+
+      if (diffInMinutes < 1) return 'Just now';
+      if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) return `${diffInDays}d ago`;
+
+      return time.toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return 'Unknown';
+    }
   };
 
   return (
@@ -172,28 +372,40 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        <button className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group">
+        <button
+          onClick={() => navigate('/admin/users')}
+          className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group cursor-pointer"
+        >
           <Eye className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
           <div>
             <p className="font-medium text-foreground">View Users</p>
             <p className="text-xs text-muted-foreground">Manage user accounts</p>
           </div>
         </button>
-        <button className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group">
+        <button
+          onClick={() => navigate('/admin/bills')}
+          className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group cursor-pointer"
+        >
           <FileText className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
           <div>
             <p className="font-medium text-foreground">View Bills</p>
             <p className="text-xs text-muted-foreground">Bill management</p>
           </div>
         </button>
-        <button className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group">
+        <button
+          onClick={() => navigate('/admin/activity')}
+          className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group cursor-pointer"
+        >
           <Activity className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
           <div>
             <p className="font-medium text-foreground">Activity Logs</p>
             <p className="text-xs text-muted-foreground">System activity</p>
           </div>
         </button>
-        <button className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group">
+        <button
+          onClick={() => navigate('/admin/settings')}
+          className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:bg-accent/10 transition-colors text-left group cursor-pointer"
+        >
           <Shield className="h-8 w-8 text-accent group-hover:scale-110 transition-transform" />
           <div>
             <p className="font-medium text-foreground">System Settings</p>
@@ -305,12 +517,15 @@ export default function AdminDashboard() {
             <Activity className="h-5 w-5 text-accent" />
             <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
           </div>
-          <button className="text-sm text-accent hover:text-accent/80 transition-colors">
+          <button
+            onClick={() => navigate('/admin/activity')}
+            className="text-sm text-accent hover:text-accent/80 transition-colors"
+          >
             View all
           </button>
         </div>
         <div className="space-y-3">
-          {loading ? (
+          {activitiesLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="h-8 w-8 bg-muted animate-pulse rounded-full" />
@@ -320,6 +535,43 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))
+          ) : recentActivities.length > 0 ? (
+            recentActivities.map((activity, index) => {
+              // Ensure all values are safely converted to strings
+              const safeActivity = {
+                id: activity.id || `activity-${index}`,
+                action: String(activity.action || 'Unknown action'),
+                user_email: String(activity.user_email || 'Unknown user'),
+                timestamp: activity.timestamp || new Date().toISOString(),
+                details: activity.details ? String(activity.details) : null
+              };
+
+              return (
+                <div key={safeActivity.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:bg-accent/5 transition-colors">
+                  <div className="h-8 w-8 bg-accent/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Activity className="h-4 w-4 text-accent" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {safeActivity.action}
+                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-muted-foreground">
+                        by {safeActivity.user_email}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatTimeAgo(safeActivity.timestamp)}
+                      </p>
+                    </div>
+                    {safeActivity.details && (
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {safeActivity.details}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <Activity className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -329,5 +581,13 @@ export default function AdminDashboard() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function AdminDashboardWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <AdminDashboard />
+    </ErrorBoundary>
   );
 }
