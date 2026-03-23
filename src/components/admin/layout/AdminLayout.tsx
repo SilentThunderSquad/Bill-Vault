@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/context/admin/AdminAuthContext';
+import { supabase } from '@/services/supabase';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Shield,
   LayoutDashboard,
@@ -12,14 +24,18 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
+  ChevronLeft,
+  ChevronRight,
   Crown,
-  UserCog
+  UserCog,
+  UserIcon,
+  Home
 } from 'lucide-react';
-import { cn } from '@/utils/cn';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import type { UserProfile } from '@/types';
 
-const navigationItems = [
+const adminNavigationItems = [
   {
     path: '/admin/dashboard',
     label: 'Overview',
@@ -64,183 +80,316 @@ const navigationItems = [
   }
 ];
 
-export function AdminLayout() {
-  const { user, signOut, isSuperAdmin } = useAdminAuth();
+interface AdminNavLinkProps {
+  item: typeof adminNavigationItems[0];
+  isActive: boolean;
+  collapsed?: boolean;
+  onClose?: () => void;
+}
+
+function AdminNavLink({ item, isActive, collapsed, onClose }: AdminNavLinkProps) {
+  const linkElement = (
+    <Link
+      to={item.path}
+      onClick={onClose}
+      className={cn(
+        'flex items-center rounded-lg text-sm font-medium transition-all duration-200',
+        collapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5',
+        isActive
+          ? 'bg-accent/10 text-accent'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+      )}
+    >
+      <item.icon className="h-5 w-5 shrink-0" />
+      {!collapsed && (
+        <div className="flex-1 min-w-0">
+          <div className="truncate">{item.label}</div>
+          <div className="text-xs opacity-70 truncate">{item.description}</div>
+        </div>
+      )}
+    </Link>
+  );
+
+  if (collapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger render={linkElement} />
+        <TooltipContent side="right" className="font-medium">
+          <div>
+            <div className="font-medium">{item.label}</div>
+            <div className="text-xs text-muted-foreground">{item.description}</div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return linkElement;
+}
+
+interface AdminSidebarContentProps {
+  onClose?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+function AdminSidebarContent({ onClose, collapsed, onToggleCollapse }: AdminSidebarContentProps) {
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
 
-  // Check if we're on desktop (lg breakpoint = 1024px)
+  return (
+    <div className="flex flex-col h-full bg-card border-r border-border">
+      <div className={cn("flex items-center p-4", collapsed ? "justify-center px-2" : "p-6")}>
+        <Link to="/admin/dashboard" className="flex items-center gap-2" onClick={onClose}>
+          <Shield className={cn("text-accent transition-all", collapsed ? "h-8 w-8" : "h-7 w-7")} />
+          {!collapsed && (
+            <div>
+              <div className="text-xl font-bold text-foreground">Admin</div>
+              <div className="text-sm text-muted-foreground">Bill Vault</div>
+            </div>
+          )}
+        </Link>
+      </div>
+
+      <nav className={cn("flex-1 space-y-1", collapsed ? "px-2" : "px-3")}>
+        {adminNavigationItems.map((item) => {
+          const isActive = location.pathname === item.path ||
+                          (item.path === '/admin/dashboard' && location.pathname === '/admin');
+          return (
+            <AdminNavLink
+              key={item.path}
+              item={item}
+              isActive={isActive}
+              collapsed={collapsed}
+              onClose={onClose}
+            />
+          );
+        })}
+      </nav>
+
+      {/* Collapse toggle button - desktop only */}
+      {onToggleCollapse && (
+        <div className={cn("px-3 py-2", collapsed && "px-2")}>
+          <button
+            onClick={onToggleCollapse}
+            className={cn(
+              "flex items-center w-full rounded-lg text-sm font-medium transition-all text-muted-foreground hover:bg-muted hover:text-foreground",
+              collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+            )}
+          >
+            {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            {!collapsed && <span>Collapse</span>}
+          </button>
+        </div>
+      )}
+
+      <div className={cn("p-4 border-t border-border", collapsed && "p-2")}>
+        {collapsed ? (
+          <p className="text-xs text-muted-foreground text-center">v1.0</p>
+        ) : (
+          <p className="text-xs text-muted-foreground text-center">Admin Dashboard v1.0</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface AdminSidebarProps {
+  open: boolean;
+  onClose: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+function AdminSidebar({ open, onClose, collapsed, onToggleCollapse }: AdminSidebarProps) {
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className={cn(
+        "hidden lg:block fixed inset-y-0 left-0 z-30 transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
+      )}>
+        <AdminSidebarContent collapsed={collapsed} onToggleCollapse={onToggleCollapse} />
+      </div>
+
+      {/* Mobile sidebar */}
+      <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+        <SheetContent side="left" className="p-0 w-64 bg-card">
+          <AdminSidebarContent onClose={onClose} />
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+
+interface AdminHeaderProps {
+  onMenuClick?: () => void;
+}
+
+function AdminHeader({ onMenuClick }: AdminHeaderProps) {
+  const { user, signOut, isSuperAdmin } = useAdminAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [headerImageError, setHeaderImageError] = useState(false);
+
   useEffect(() => {
-    const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+    const loadProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      if (data) setProfile(data);
     };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+    loadProfile();
+  }, [user]);
 
   const handleSignOut = async () => {
     if (window.confirm('Are you sure you want to sign out of the admin dashboard?')) {
       await signOut();
+      toast.success('Signed out successfully');
+      navigate('/admin/login');
     }
   };
 
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin';
+  const initials = displayName.slice(0, 2).toUpperCase();
+
+  // Get avatar URL with Google profile fallback - same logic as user header
+  const getAvatarUrl = () => {
+    // Check if we have a custom uploaded avatar (but not Google URLs which might have CORS issues)
+    if (profile?.avatar_url && profile.avatar_url.trim() && profile.avatar_url.startsWith('http') && !profile.avatar_url.includes('googleusercontent.com')) {
+      return profile.avatar_url;
+    }
+
+    // Always use fresh Google profile images from user metadata
+    if (user?.user_metadata?.picture) {
+      return user.user_metadata.picture;
+    }
+    if (user?.user_metadata?.avatar_url) {
+      return user.user_metadata.avatar_url;
+    }
+
+    return null;
+  };
+
+  const avatarUrl = getAvatarUrl();
+
+  // Reset header image error when avatar URL changes
+  useEffect(() => {
+    setHeaderImageError(false);
+  }, [avatarUrl]);
+
+  const adminRoleLabel = isSuperAdmin ? 'Super Admin' : 'Admin';
+  const roleIcon = isSuperAdmin ? Crown : UserCog;
+  const roleIconColor = isSuperAdmin ? 'text-amber-500' : 'text-accent';
+  const roleBadgeColor = isSuperAdmin ? 'bg-amber-500/20 text-amber-700 border-amber-500/30' : 'bg-accent/20 text-accent border-accent/30';
+
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
-      {/* Mobile sidebar overlay */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border px-4 md:px-6 h-16 flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        {/* Mobile menu button */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded-md hover:bg-accent/10 transition-colors"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
 
-      {/* Sidebar */}
-      <motion.div
-        initial={false}
-        animate={
-          isDesktop
-            ? { x: 0 } // Always visible on desktop
-            : { x: sidebarOpen ? 0 : '-100%' } // Animated on mobile
-        }
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border lg:relative lg:translate-x-0',
-          'lg:flex lg:w-64 lg:flex-col'
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Sidebar header */}
-          <div className="flex h-16 items-center justify-between px-6 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Shield className="h-8 w-8 text-accent" />
-              <div>
-                <h1 className="text-lg font-bold text-foreground">Admin</h1>
-                <p className="text-xs text-muted-foreground">Bill Vault</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 rounded-md hover:bg-accent/10 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+        {/* Home button */}
+        <Link to="/">
+          <Button variant="ghost" size="sm" className="gap-2">
+            <Home className="h-4 w-4" />
+            <span className="hidden sm:inline">Home</span>
+          </Button>
+        </Link>
+      </div>
 
-          {/* Admin info */}
-          <div className="px-6 py-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
-                {isSuperAdmin ? (
-                  <Crown className="h-5 w-5 text-accent" />
-                ) : (
-                  <UserCog className="h-5 w-5 text-accent" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin'}
-                </p>
-                <div className="flex items-center gap-1">
-                  <span className={cn(
-                    'text-xs px-2 py-0.5 rounded-full',
-                    isSuperAdmin
-                      ? 'bg-accent/20 text-accent'
-                      : 'bg-muted text-muted-foreground'
-                  )}>
-                    {isSuperAdmin ? 'Super Admin' : 'Admin'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path ||
-                              (item.path === '/admin/dashboard' && location.pathname === '/admin');
-
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                    isActive
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/10'
-                  )}
-                >
-                  <Icon className="mr-3 h-5 w-5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate">{item.label}</div>
-                    <div className="text-xs opacity-70 truncate">{item.description}</div>
-                  </div>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Sign out */}
-          <div className="p-4 border-t border-border">
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-destructive/10 rounded-lg transition-colors group"
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              <span>Sign out</span>
-            </button>
-          </div>
+      <div className="flex items-center gap-2">
+        {/* Role indicator - only on left side of profile */}
+        <div className={cn(
+          "hidden sm:flex items-center gap-2 px-2 py-1 rounded-full border text-xs font-medium",
+          roleBadgeColor
+        )}>
+          {roleIcon && <roleIcon className={cn("h-3.5 w-3.5", roleIconColor)} />}
+          <span>{adminRoleLabel}</span>
         </div>
-      </motion.div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top header */}
-        <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm">
-          <div className="flex h-full items-center justify-between px-4 lg:px-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-md hover:bg-accent/10 transition-colors"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-
-              {/* breadcrumb path */}
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>/</span>
-                <span className="text-foreground font-medium">
-                  {navigationItems.find(item =>
-                    item.path === location.pathname ||
-                    (item.path === '/admin/dashboard' && location.pathname === '/admin')
-                  )?.label || 'Admin'}
-                </span>
-              </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-muted transition-colors">
+            <Avatar className="h-8 w-8">
+              {avatarUrl && !headerImageError ? (
+                <AvatarImage
+                  src={avatarUrl}
+                  alt={displayName}
+                  onError={() => setHeaderImageError(true)}
+                />
+              ) : null}
+              <AvatarFallback className="bg-accent/20 text-accent text-sm">{initials}</AvatarFallback>
+            </Avatar>
+            <span className="hidden sm:block text-sm font-medium text-foreground max-w-[120px] truncate">
+              {displayName}
+            </span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
+              <UserIcon className="mr-2 h-4 w-4" />
+              Edit Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              Admin Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </header>
+  );
+}
 
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground hidden md:block">
-                Last update: {new Date().toLocaleTimeString()}
-              </div>
-            </div>
-          </div>
-        </header>
+export function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto p-4 lg:p-6">
+  // Initialize sidebar collapsed state from localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('admin-sidebar-collapsed');
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('admin-sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <AdminSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
+
+      <div className={cn(
+        "lg:transition-all lg:duration-300",
+        sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+      )}>
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+
+        <main className="p-4 lg:p-6">
           <Outlet />
         </main>
       </div>
