@@ -17,11 +17,14 @@ import {
   XCircle,
   Clock,
   Tag,
-  Image
+  Image,
+  ExternalLink,
+  ZoomIn
 } from 'lucide-react';
 import { supabase } from '@/services/supabase';
 import { cn } from '@/utils/cn';
 import { toast } from 'sonner';
+import { FilePreviewModal } from '@/components/bills/FilePreviewModal';
 
 interface Bill {
   id: string;
@@ -73,6 +76,7 @@ export default function BillsManagement() {
   });
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [showBillModal, setShowBillModal] = useState(false);
+  const [showFilePreview, setShowFilePreview] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
@@ -908,25 +912,95 @@ export default function BillsManagement() {
                 <div>
                   <h3 className="text-lg font-medium text-foreground mb-3 lg:hidden">File Preview</h3>
                   <label className="hidden lg:block text-sm font-medium text-muted-foreground mb-2">File Preview</label>
-                  {selectedBill.thumbnail_url ? (
-                    <div>
-                      <img
-                        src={selectedBill.thumbnail_url}
-                        alt="Bill document"
-                        className="w-full max-w-md mx-auto lg:mx-0 rounded-lg border border-border"
-                      />
-                      <div className="mt-3 text-sm text-muted-foreground">
-                        <p>Type: {selectedBill.file_type}</p>
-                        <p>Size: {formatFileSize(selectedBill.file_size)}</p>
+
+                  {selectedBill.file_url ? (
+                    <div className="space-y-3">
+                      {/* Preview Container */}
+                      <div className="relative group">
+                        {selectedBill.thumbnail_url ? (
+                          /* Image thumbnail preview */
+                          <div className="relative">
+                            <img
+                              src={selectedBill.thumbnail_url}
+                              alt="Bill document"
+                              className="w-full max-w-md mx-auto lg:mx-0 rounded-lg border border-border cursor-pointer transition-transform hover:scale-105"
+                              onClick={() => setShowFilePreview(true)}
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                              <button
+                                onClick={() => setShowFilePreview(true)}
+                                className="bg-white/90 text-black px-3 py-2 rounded-lg flex items-center gap-2 font-medium"
+                              >
+                                <ZoomIn className="h-4 w-4" />
+                                View Full Size
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* PDF or file without thumbnail */
+                          <div
+                            className="p-6 lg:p-8 border-2 border-dashed border-border rounded-lg text-center hover:border-accent transition-colors cursor-pointer group"
+                            onClick={() => setShowFilePreview(true)}
+                          >
+                            <div className="flex flex-col items-center gap-3">
+                              {selectedBill.file_type?.includes('pdf') ? (
+                                <FileText className="h-12 w-12 lg:h-16 lg:w-16 text-red-500 group-hover:text-red-400 transition-colors" />
+                              ) : selectedBill.file_type?.includes('image') ? (
+                                <Image className="h-12 w-12 lg:h-16 lg:w-16 text-blue-500 group-hover:text-blue-400 transition-colors" />
+                              ) : (
+                                <FileText className="h-12 w-12 lg:h-16 lg:w-16 text-muted-foreground group-hover:text-foreground transition-colors" />
+                              )}
+                              <div>
+                                <p className="font-medium text-foreground group-hover:text-accent transition-colors">
+                                  {selectedBill.file_type?.includes('pdf') ? 'PDF Document' :
+                                   selectedBill.file_type?.includes('image') ? 'Image File' : 'Document'}
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Click to view full document
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                                <ExternalLink className="h-3 w-3" />
+                                Open Preview
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      {/* File Details */}
+                      <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {selectedBill.file_type && (
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">Type:</span>
+                              <span className="font-mono text-xs bg-background px-2 py-1 rounded">
+                                {selectedBill.file_type}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Size:</span>
+                            <span>{formatFileSize(selectedBill.file_size)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Preview Action Button */}
+                      <button
+                        onClick={() => setShowFilePreview(true)}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Open in Full Screen
+                      </button>
                     </div>
                   ) : (
+                    /* No file available */
                     <div className="p-8 lg:p-12 border-2 border-dashed border-border rounded-lg text-center">
                       <FileText className="h-16 w-16 lg:h-12 lg:w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-                      <p className="text-muted-foreground">No preview available</p>
-                      {selectedBill.file_type && (
-                        <p className="text-sm text-muted-foreground mt-1">{selectedBill.file_type}</p>
-                      )}
+                      <p className="text-muted-foreground">No file attached</p>
+                      <p className="text-sm text-muted-foreground mt-1">This bill has no associated document</p>
                     </div>
                   )}
                 </div>
@@ -966,6 +1040,14 @@ export default function BillsManagement() {
           </motion.div>
         </motion.div>
       )}
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        fileUrl={selectedBill?.file_url}
+        fileName={selectedBill?.title}
+        isOpen={showFilePreview}
+        onClose={() => setShowFilePreview(false)}
+      />
     </div>
   );
 }
