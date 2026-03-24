@@ -20,6 +20,29 @@ import {
 import { supabase } from '@/services/supabase';
 import { cn } from '@/utils/cn';
 import { toast } from 'sonner';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer
+} from 'recharts';
 
 interface AnalyticsData {
   // User Analytics
@@ -75,6 +98,61 @@ const timeRanges: TimeRange[] = [
   { label: 'Last 90 Days', value: '90d', days: 90 },
   { label: 'Last Year', value: '1y', days: 365 }
 ];
+
+// Chart configurations with vibrant, high-contrast colors for better visibility
+const userGrowthConfig = {
+  count: {
+    label: "Users",
+    color: "#3b82f6", // Bright blue
+  },
+} satisfies ChartConfig;
+
+const billCreationConfig = {
+  count: {
+    label: "Bills",
+    color: "#10b981", // Bright emerald green
+  },
+} satisfies ChartConfig;
+
+const categoryConfig = {
+  Electronics: { label: "Electronics", color: "#3b82f6" }, // Bright blue
+  Appliances: { label: "Appliances", color: "#10b981" }, // Bright emerald
+  Furniture: { label: "Furniture", color: "#f59e0b" }, // Bright amber
+  Clothing: { label: "Clothing", color: "#ef4444" }, // Bright red
+  Automobile: { label: "Automobile", color: "#8b5cf6" }, // Bright violet
+  "Health & Beauty": { label: "Health & Beauty", color: "#06b6d4" }, // Bright cyan
+  "Sports & Fitness": { label: "Sports & Fitness", color: "#84cc16" }, // Bright lime
+  Jewelry: { label: "Jewelry", color: "#f97316" }, // Bright orange
+  Software: { label: "Software", color: "#ec4899" }, // Bright pink
+  "Home & Garden": { label: "Home & Garden", color: "#22c55e" }, // Bright green
+  Toys: { label: "Toys", color: "#eab308" }, // Bright yellow
+  Other: { label: "Other", color: "#6b7280" }, // Neutral gray
+} satisfies ChartConfig;
+
+const revenueConfig = {
+  amount: {
+    label: "Revenue",
+    color: "#f59e0b", // Bright amber for revenue
+  },
+} satisfies ChartConfig;
+
+const storageConfig = {
+  usage: {
+    label: "Storage (GB)",
+    color: "#8b5cf6", // Bright violet for storage
+  },
+} satisfies ChartConfig;
+
+const processingConfig = {
+  success: {
+    label: "Success",
+    color: "#10b981", // Bright emerald for success
+  },
+  failed: {
+    label: "Failed",
+    color: "#ef4444", // Bright red for failures
+  },
+} satisfies ChartConfig;
 
 export default function SystemAnalytics() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -821,33 +899,50 @@ export default function SystemAnalytics() {
             className="bg-card border border-border rounded-lg p-4 lg:p-6"
           >
             <h3 className="text-base lg:text-lg font-semibold text-foreground mb-4">User Growth</h3>
-            <div className="h-48 lg:h-64 flex items-end justify-center gap-1 lg:gap-2 px-2">
-              {chartData?.userRegistrations && chartData.userRegistrations.length > 0 ? (
-                chartData.userRegistrations.map((item, index) => {
-                  const maxCount = Math.max(...(chartData.userRegistrations?.map(i => i.count) || [1]));
-                  const height = maxCount > 0 ? Math.max((item.count / maxCount) * 160, 4) : 4;
-                  return (
-                    <div key={index} className="flex flex-col items-center">
-                      <div
-                        className="bg-blue-500 rounded-t w-4 lg:w-8 transition-all hover:bg-blue-400"
-                        style={{ height: `${height}px` }}
-                        title={`${item.count} users on ${new Date(item.date).toLocaleDateString()}`}
-                      />
-                      <span className="text-xs text-muted-foreground mt-1 transform -rotate-45 origin-left">
-                        {new Date(item.date).getDate()}
-                      </span>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-                  <div className="text-center">
-                    <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No registration data available</p>
-                  </div>
+            {chartData?.userRegistrations && chartData.userRegistrations.length > 0 ? (
+              <ChartContainer config={userGrowthConfig} className="h-48 lg:h-64 w-full">
+                <AreaChart data={chartData.userRegistrations}>
+                  <defs>
+                    <linearGradient id="userGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                    tickFormatter={(value) => new Date(value).getDate().toString()}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                  />
+                  <ChartTooltip
+                    content={<ChartTooltipContent
+                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    />}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#3b82f6"
+                    fill="url(#userGradient)"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex items-center justify-center h-48 lg:h-64 text-muted-foreground">
+                <div className="text-center">
+                  <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No registration data available</p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             <div className="mt-4 text-sm text-muted-foreground text-center lg:text-left">
               Daily user registrations over the selected period
             </div>
@@ -861,33 +956,42 @@ export default function SystemAnalytics() {
             className="bg-card border border-border rounded-lg p-4 lg:p-6"
           >
             <h3 className="text-base lg:text-lg font-semibold text-foreground mb-4">Bill Creation</h3>
-            <div className="h-48 lg:h-64 flex items-end justify-center gap-1 lg:gap-2 px-2">
-              {chartData?.billCreations && chartData.billCreations.length > 0 ? (
-                chartData.billCreations.map((item, index) => {
-                  const maxCount = Math.max(...(chartData.billCreations?.map(i => i.count) || [1]));
-                  const height = maxCount > 0 ? Math.max((item.count / maxCount) * 160, 4) : 4;
-                  return (
-                    <div key={index} className="flex flex-col items-center">
-                      <div
-                        className="bg-green-500 rounded-t w-4 lg:w-8 transition-all hover:bg-green-400"
-                        style={{ height: `${height}px` }}
-                        title={`${item.count} bills on ${new Date(item.date).toLocaleDateString()}`}
-                      />
-                      <span className="text-xs text-muted-foreground mt-1 transform -rotate-45 origin-left">
-                        {new Date(item.date).getDate()}
-                      </span>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-                  <div className="text-center">
-                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No bill creation data available</p>
-                  </div>
+            {chartData?.billCreations && chartData.billCreations.length > 0 ? (
+              <ChartContainer config={billCreationConfig} className="h-48 lg:h-64 w-full">
+                <BarChart data={chartData.billCreations}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                    tickFormatter={(value) => new Date(value).getDate().toString()}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                  />
+                  <ChartTooltip
+                    content={<ChartTooltipContent
+                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    />}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="#10b981"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex items-center justify-center h-48 lg:h-64 text-muted-foreground">
+                <div className="text-center">
+                  <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No bill creation data available</p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             <div className="mt-4 text-sm text-muted-foreground text-center lg:text-left">
               Daily bill uploads over the selected period
             </div>
@@ -903,36 +1007,86 @@ export default function SystemAnalytics() {
         className="bg-card border border-border rounded-lg p-4 lg:p-6"
       >
         <h3 className="text-base lg:text-lg font-semibold text-foreground mb-4">Category Distribution</h3>
-        <div className="space-y-3">
-          {chartData?.categoryDistribution && chartData.categoryDistribution.length > 0 ? (
-            chartData.categoryDistribution.map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-foreground truncate">{item.category}</span>
-                    <span className="text-xs text-muted-foreground flex-shrink-0">({item.count})</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <div className="w-16 lg:w-24 h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-accent rounded-full transition-all"
-                      style={{ width: `${item.percentage}%` }}
+        {chartData?.categoryDistribution && chartData.categoryDistribution.length > 0 ? (
+          <div className="grid lg:grid-cols-2 gap-4 items-center">
+            <ChartContainer config={categoryConfig} className="h-64 w-full">
+              <PieChart>
+                <ChartTooltip
+                  content={<ChartTooltipContent
+                    formatter={(value, name) => [`${value} bills (${((value as number / chartData.categoryDistribution.reduce((sum, item) => sum + item.count, 0)) * 100).toFixed(1)}%)`, name]}
+                  />}
+                />
+                <Pie
+                  data={chartData.categoryDistribution}
+                  dataKey="count"
+                  nameKey="category"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  strokeWidth={2}
+                >
+                  {chartData.categoryDistribution.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={categoryConfig[entry.category as keyof typeof categoryConfig]?.color || "#6b7280"}
                     />
+                  ))}
+                </Pie>
+                <ChartLegend
+                  content={<ChartLegendContent />}
+                  layout="vertical"
+                  align="right"
+                  verticalAlign="middle"
+                  wrapperStyle={{ fontSize: '12px', paddingLeft: '20px' }}
+                />
+              </PieChart>
+            </ChartContainer>
+
+            {/* Detailed breakdown */}
+            <div className="space-y-3">
+              {chartData.categoryDistribution.slice(0, 6).map((item, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: categoryConfig[item.category as keyof typeof categoryConfig]?.color || "#6b7280" }}
+                    />
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-sm font-medium text-foreground truncate">{item.category}</span>
+                      <span className="text-xs text-muted-foreground flex-shrink-0">({item.count})</span>
+                    </div>
                   </div>
-                  <span className="text-sm font-medium text-foreground min-w-[3rem] text-right">
-                    {item.percentage.toFixed(1)}%
-                  </span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="w-16 lg:w-20 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${item.percentage}%`,
+                          backgroundColor: categoryConfig[item.category as keyof typeof categoryConfig]?.color || "#6b7280"
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-foreground min-w-[3rem] text-right">
+                      {item.percentage.toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No category data available</p>
+              ))}
+              {chartData.categoryDistribution.length > 6 && (
+                <div className="text-xs text-muted-foreground text-center pt-2">
+                  +{chartData.categoryDistribution.length - 6} more categories
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>No category data available</p>
+          </div>
+        )}
         <div className="mt-4 text-sm text-muted-foreground text-center lg:text-left">
           Distribution of bills across all categories
         </div>
@@ -946,37 +1100,184 @@ export default function SystemAnalytics() {
         className="bg-card border border-border rounded-lg p-4 lg:p-6"
       >
         <h3 className="text-base lg:text-lg font-semibold text-foreground mb-4">Revenue Trend</h3>
-        <div className="h-48 lg:h-64 flex items-end justify-center gap-1 lg:gap-2 px-2">
-          {chartData?.revenueByMonth && chartData.revenueByMonth.length > 0 ? (
-            chartData.revenueByMonth.map((item, index) => {
-              const maxAmount = Math.max(...(chartData.revenueByMonth?.map(i => i.amount) || [1]));
-              const height = maxAmount > 0 ? Math.max((item.amount / maxAmount) * 160, 4) : 4;
-              return (
-                <div key={index} className="flex flex-col items-center">
-                  <div
-                    className="bg-yellow-500 rounded-t w-4 lg:w-8 transition-all hover:bg-yellow-400"
-                    style={{ height: `${height}px` }}
-                    title={formatCurrency(item.amount)}
-                  />
-                  <span className="text-xs text-muted-foreground mt-1 transform -rotate-45 origin-left">
-                    {item.month}
-                  </span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-              <div className="text-center">
-                <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No revenue data available</p>
-              </div>
+        {chartData?.revenueByMonth && chartData.revenueByMonth.length > 0 ? (
+          <ChartContainer config={revenueConfig} className="h-48 lg:h-64 w-full">
+            <AreaChart data={chartData.revenueByMonth}>
+              <defs>
+                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                  <stop offset="50%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                className="text-xs"
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                className="text-xs"
+                tickFormatter={formatCurrency}
+              />
+              <ChartTooltip
+                content={<ChartTooltipContent
+                  formatter={(value) => [formatCurrency(value as number), "Revenue"]}
+                  labelFormatter={(value) => `${value} 2024`}
+                />}
+              />
+              <Area
+                type="monotone"
+                dataKey="amount"
+                stroke="#f59e0b"
+                fill="url(#revenueGradient)"
+                strokeWidth={2}
+                dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ChartContainer>
+        ) : (
+          <div className="flex items-center justify-center h-48 lg:h-64 text-muted-foreground">
+            <div className="text-center">
+              <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No revenue data available</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <div className="mt-4 text-sm text-muted-foreground text-center lg:text-left">
           Monthly revenue trends over time
         </div>
       </motion.div>
+
+      {/* Operational Metrics */}
+      <div className="space-y-4 lg:space-y-6">
+        <h2 className="text-xl lg:text-2xl font-semibold text-foreground">Operational Metrics</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          {/* Storage Usage Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+            className="bg-card border border-border rounded-lg p-4 lg:p-6"
+          >
+            <h3 className="text-base lg:text-lg font-semibold text-foreground mb-4">Storage Usage Trend</h3>
+            {chartData?.storageUsage && chartData.storageUsage.length > 0 ? (
+              <ChartContainer config={storageConfig} className="h-48 lg:h-64 w-full">
+                <LineChart data={chartData.storageUsage}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                    tickFormatter={(value) => new Date(value).getDate().toString()}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                    tickFormatter={(value) => `${value.toFixed(1)} GB`}
+                  />
+                  <ChartTooltip
+                    content={<ChartTooltipContent
+                      formatter={(value) => [`${(value as number).toFixed(2)} GB`, "Storage"]}
+                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    />}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="usage"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, strokeWidth: 2 }}
+                  />
+                </LineChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex items-center justify-center h-48 lg:h-64 text-muted-foreground">
+                <div className="text-center">
+                  <Database className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No storage data available</p>
+                </div>
+              </div>
+            )}
+            <div className="mt-4 text-sm text-muted-foreground text-center lg:text-left">
+              Storage usage growth over time
+            </div>
+          </motion.div>
+
+          {/* Processing Stats Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="bg-card border border-border rounded-lg p-4 lg:p-6"
+          >
+            <h3 className="text-base lg:text-lg font-semibold text-foreground mb-4">Processing Statistics</h3>
+            {chartData?.processingStats && chartData.processingStats.length > 0 ? (
+              <ChartContainer config={processingConfig} className="h-48 lg:h-64 w-full">
+                <AreaChart data={chartData.processingStats} stackOffset="expand">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                    tickFormatter={(value) => new Date(value).getDate().toString()}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                    tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                  />
+                  <ChartTooltip
+                    content={<ChartTooltipContent
+                      formatter={(value, name) => [
+                        `${value} ${name.toLowerCase()}`,
+                        name
+                      ]}
+                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    />}
+                  />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="success"
+                    stackId="1"
+                    stroke="#10b981"
+                    fill="#10b981"
+                    fillOpacity={0.8}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="failed"
+                    stackId="1"
+                    stroke="#ef4444"
+                    fill="#ef4444"
+                    fillOpacity={0.8}
+                  />
+                </AreaChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex items-center justify-center h-48 lg:h-64 text-muted-foreground">
+                <div className="text-center">
+                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No processing data available</p>
+                </div>
+              </div>
+            )}
+            <div className="mt-4 text-sm text-muted-foreground text-center lg:text-left">
+              Daily processing success vs failure rates
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
