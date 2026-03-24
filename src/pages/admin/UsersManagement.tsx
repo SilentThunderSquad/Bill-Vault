@@ -33,7 +33,6 @@ interface User {
   role: string | null;
   total_bills: number | null;
   storage_used_bytes: number | null;
-  last_login_at: string | null;
   total_spent: number | null;
   activity_status: 'active' | 'inactive' | 'dormant';
   provider?: string | null;
@@ -463,17 +462,17 @@ export default function UsersManagement() {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          {user.last_login_at ? (
+                          {user.last_sign_in_at ? (
                             <div className="cell-text">
                               <p className="text-sm text-foreground text-truncate">
-                                {new Date(user.last_login_at).toLocaleDateString('en-US', {
+                                {new Date(user.last_sign_in_at).toLocaleDateString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
                                   year: '2-digit'
                                 })}
                               </p>
                               <p className="text-xs text-muted-foreground text-truncate">
-                                {new Date(user.last_login_at).toLocaleTimeString('en-US', {
+                                {new Date(user.last_sign_in_at).toLocaleTimeString('en-US', {
                                   hour: '2-digit',
                                   minute: '2-digit'
                                 })}
@@ -582,8 +581,8 @@ export default function UsersManagement() {
                       </div>
                       <div className="text-center">
                         <span className="text-sm font-medium">
-                          {user.last_login_at
-                            ? new Date(user.last_login_at).toLocaleDateString()
+                          {user.last_sign_in_at
+                            ? new Date(user.last_sign_in_at).toLocaleDateString()
                             : 'Never'
                           }
                         </span>
@@ -766,8 +765,8 @@ export default function UsersManagement() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Last Login</label>
                   <p className="text-foreground mt-1">
-                    {selectedUser.last_login_at
-                      ? new Date(selectedUser.last_login_at).toLocaleString()
+                    {selectedUser.last_sign_in_at
+                      ? new Date(selectedUser.last_sign_in_at).toLocaleString()
                       : 'Never'
                     }
                   </p>

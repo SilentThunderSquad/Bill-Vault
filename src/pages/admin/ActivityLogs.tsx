@@ -102,17 +102,93 @@ export default function ActivityLogs() {
       setLoading(true);
       setError(null);
 
+      // Enhanced query: Join with user information to get actual names instead of UIDs
       const { data, error: logsError } = await supabase
         .from('admin_activity_logs')
-        .select('*')
+        .select(`
+          *,
+          admin_users:admin_id (email),
+          admin_profiles:admin_id (full_name),
+          resource_users:resource_id (email),
+          resource_profiles:resource_id (full_name)
+        `)
         .order('created_at', { ascending: false })
         .limit(1000);
 
       if (logsError) {
-        throw logsError;
+        console.warn('Direct join failed, falling back to manual lookup:', logsError);
+
+        // Fallback: Get logs first, then lookup user names manually
+        const { data: basicLogs, error: basicError } = await supabase
+          .from('admin_activity_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1000);
+
+        if (basicError) {
+          throw basicError;
+        }
+
+        // Enhance logs with user information
+        const enhancedLogs = await Promise.all(
+          (basicLogs || []).map(async (log) => {
+            let user_email = null;
+            let user_full_name = null;
+
+            // Get admin user info
+            if (log.admin_id) {
+              const { data: adminUser } = await supabase
+                .from('admin_user_overview')
+                .select('email, full_name')
+                .eq('id', log.admin_id)
+                .single();
+
+              if (adminUser) {
+                user_email = adminUser.email;
+                user_full_name = adminUser.full_name;
+              }
+            }
+
+            // If action is on a user resource, get that user's info instead
+            if (log.resource_type === 'user' && log.resource_id) {
+              const { data: resourceUser } = await supabase
+                .from('admin_user_overview')
+                .select('email, full_name')
+                .eq('id', log.resource_id)
+                .single();
+
+              if (resourceUser) {
+                user_email = resourceUser.email;
+                user_full_name = resourceUser.full_name;
+              }
+            }
+
+            return {
+              ...log,
+              user_id: log.resource_type === 'user' ? log.resource_id : log.admin_id,
+              user_email,
+              user_full_name
+            };
+          })
+        );
+
+        setLogs(enhancedLogs);
+        return;
       }
 
-      setLogs(data || []);
+      // Process joined data
+      const processedLogs = (data || []).map(log => ({
+        ...log,
+        user_id: log.resource_type === 'user' ? log.resource_id : log.admin_id,
+        user_email: log.resource_type === 'user'
+          ? log.resource_users?.email || null
+          : log.admin_users?.email || null,
+        user_full_name: log.resource_type === 'user'
+          ? log.resource_profiles?.full_name || null
+          : log.admin_profiles?.full_name || null
+      }));
+
+      setLogs(processedLogs);
     } catch (err) {
       console.error('Error loading activity logs:', err);
       setError('Failed to load activity logs');
