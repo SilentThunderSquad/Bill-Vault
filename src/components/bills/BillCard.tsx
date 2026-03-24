@@ -84,7 +84,7 @@ export function BillCard({ bill, onClick }: BillCardProps) {
 
           <div className="pt-2 border-t border-border flex items-center justify-between">
             <span className="text-base sm:text-lg font-bold text-foreground text-truncate">
-              {formatCurrency(bill.price, bill.currency)}
+              {formatCurrency(bill.price)}
             </span>
             {days >= 0 && (
               <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">

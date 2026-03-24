@@ -59,7 +59,7 @@ export function RecentBills({ bills }: RecentBillsProps) {
                     </p>
                     <span className="text-muted-foreground/50 shrink-0">•</span>
                     <p className="text-xs font-medium text-foreground text-truncate">
-                      {formatCurrency(bill.price, bill.currency)}
+                      {formatCurrency(bill.price)}
                     </p>
                   </div>
                 </div>

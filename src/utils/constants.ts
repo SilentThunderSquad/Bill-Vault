@@ -19,6 +19,7 @@ export const WARRANTY_STATUSES = {
   expired: { label: 'Expired', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
 } as const;
 
-export const CURRENCY_OPTIONS = ['INR', 'USD', 'EUR', 'GBP'] as const;
+// Fixed to INR for India-based project
+export const DEFAULT_CURRENCY = 'INR' as const;
 
 export const EXPIRING_SOON_DAYS = 30;

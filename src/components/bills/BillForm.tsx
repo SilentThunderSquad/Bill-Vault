@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PRODUCT_CATEGORIES, CURRENCY_OPTIONS } from '@/utils/constants';
+import { PRODUCT_CATEGORIES, DEFAULT_CURRENCY } from '@/utils/constants';
 import { calculateExpiryDate } from '@/utils/formatters';
 import { validateBillForm } from '@/utils/validators';
 import { Loader2, Package, Calendar, Store, FileText, Save } from 'lucide-react';
@@ -34,7 +34,7 @@ const emptyForm: BillFormData = {
   store_name: '',
   category: 'Electronics',
   price: '',
-  currency: 'INR',
+  currency: DEFAULT_CURRENCY,
   notes: '',
 };
 
@@ -101,7 +101,8 @@ export function BillForm({
       setErrors(validationErrors);
       return;
     }
-    onSubmit(form);
+    // Ensure currency is always INR for India-based project
+    onSubmit({ ...form, currency: DEFAULT_CURRENCY });
   };
 
   return (
@@ -224,19 +225,6 @@ export function BillForm({
             {errors.price && (
               <p className="text-xs text-destructive" role="alert">{errors.price}</p>
             )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="currency" className="text-sm">Currency</Label>
-            <Select value={form.currency} onValueChange={(v) => v && handleChange('currency', v)}>
-              <SelectTrigger className="h-11">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCY_OPTIONS.map((cur) => (
-                  <SelectItem key={cur} value={cur}>{cur}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </div>
       </div>

@@ -62,7 +62,7 @@ export function BillDetailView({ bill, onDelete, onEdit }: BillDetailViewProps) 
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <DetailRow icon={CreditCard} label="Price" value={formatCurrency(bill.price, bill.currency)} />
+              <DetailRow icon={CreditCard} label="Price" value={formatCurrency(bill.price)} />
               <DetailRow icon={Store} label="Store" value={bill.store_name} />
               <DetailRow icon={Calendar} label="Purchase Date" value={formatDate(bill.purchase_date)} />
               <DetailRow

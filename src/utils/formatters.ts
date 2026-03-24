@@ -38,10 +38,10 @@ export function getWarrantyStatus(expiryDate: string): WarrantyStatus {
   return 'active';
 }
 
-export function formatCurrency(amount: number, currency: string = 'INR'): string {
+export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency,
+    currency: 'INR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);

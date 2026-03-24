@@ -232,10 +232,9 @@ export default function BillsManagement() {
     }
   };
 
-  const formatCurrency = (amount: number | null, currency: string | null) => {
+  const formatCurrency = (amount: number | null) => {
     if (!amount) return 'N/A';
-    const currencySymbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency || '';
-    return `${currencySymbol}${amount.toLocaleString()}`;
+    return `₹${amount.toLocaleString()}`;
   };
 
   const formatFileSize = (bytes: number | null) => {
@@ -519,7 +518,7 @@ export default function BillsManagement() {
                           <div className="cell-content gap-1">
                             <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
                             <span className="text-sm font-medium text-foreground text-truncate">
-                              {formatCurrency(bill.total_amount, bill.currency)}
+                              {formatCurrency(bill.total_amount)}
                             </span>
                           </div>
                         </td>
@@ -680,7 +679,7 @@ export default function BillsManagement() {
                         <div className="cell-content gap-2">
                           <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
                           <span className="font-medium text-foreground text-truncate">
-                            {formatCurrency(bill.total_amount, bill.currency)}
+                            {formatCurrency(bill.total_amount)}
                           </span>
                         </div>
                         <div className="cell-content gap-2">
@@ -819,7 +818,7 @@ export default function BillsManagement() {
                     <div>
                       <label className="block text-sm font-medium text-muted-foreground mb-1">Amount</label>
                       <p className="text-base text-foreground font-medium">
-                        {formatCurrency(selectedBill.total_amount, selectedBill.currency)}
+                        {formatCurrency(selectedBill.total_amount)}
                       </p>
                     </div>
                     <div>

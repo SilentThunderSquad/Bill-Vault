@@ -3,6 +3,7 @@ import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { sanitizeHtml } from '@/utils/security';
 import { activityTracker, ActivityHelpers } from '@/services/activityTracker';
+import { DEFAULT_CURRENCY } from '@/utils/constants';
 import type { Bill, BillFormData } from '@/types';
 
 const PAGE_SIZE = 20;
@@ -145,7 +146,7 @@ export function useBills() {
         store_name: sanitizeHtml(formData.store_name),
         category: formData.category,
         price: Math.max(parseFloat(formData.price) || 0, 0),
-        currency: formData.currency || 'INR',
+        currency: DEFAULT_CURRENCY,
         notes: formData.notes ? sanitizeHtml(formData.notes) : null,
         bill_file_url,
       })
@@ -194,7 +195,7 @@ export function useBills() {
     if (formData.store_name !== undefined) update.store_name = sanitizeHtml(formData.store_name);
     if (formData.category !== undefined) update.category = formData.category;
     if (formData.price !== undefined) update.price = Math.max(parseFloat(formData.price) || 0, 0);
-    if (formData.currency !== undefined) update.currency = formData.currency;
+    if (formData.currency !== undefined) update.currency = DEFAULT_CURRENCY;
     if (formData.notes !== undefined) update.notes = formData.notes ? sanitizeHtml(formData.notes) : null;
 
     // Handle new file upload (image or PDF)
