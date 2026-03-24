@@ -45,21 +45,28 @@ export function RecentBills({ bills }: RecentBillsProps) {
             {bills.map((bill) => (
               <div
                 key={bill.id}
-                className="flex items-center gap-3 p-3 sm:p-4 hover:bg-muted/30 cursor-pointer transition-colors group"
+                className="cell-content gap-3 p-3 sm:p-4 hover:bg-muted/30 cursor-pointer transition-colors group touch-manipulation"
                 onClick={() => navigate(`/bills/${bill.id}`)}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate group-hover:text-accent transition-colors">
+                <div className="cell-text">
+                  <p className="text-sm font-medium text-foreground text-truncate w-truncate-lg group-hover:text-accent transition-colors"
+                     title={bill.product_name}>
                     {bill.product_name}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-xs text-muted-foreground">{formatDate(bill.purchase_date)}</p>
-                    <span className="text-muted-foreground/50">•</span>
-                    <p className="text-xs font-medium text-foreground">{formatCurrency(bill.price, bill.currency)}</p>
+                    <p className="text-xs text-muted-foreground text-truncate">
+                      {formatDate(bill.purchase_date)}
+                    </p>
+                    <span className="text-muted-foreground/50 shrink-0">•</span>
+                    <p className="text-xs font-medium text-foreground text-truncate">
+                      {formatCurrency(bill.price, bill.currency)}
+                    </p>
                   </div>
                 </div>
-                <WarrantyBadge expiryDate={bill.warranty_expiry} />
-                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="shrink-0">
+                  <WarrantyBadge expiryDate={bill.warranty_expiry} />
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
             ))}
           </div>

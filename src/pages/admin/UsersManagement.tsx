@@ -360,8 +360,16 @@ export default function UsersManagement() {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
+            <div className="hidden md:block table-responsive">
+              <table className="w-full table-fixed">
+                <colgroup>
+                  <col className="w-2/5 min-w-[200px]" />
+                  <col className="w-[110px]" />
+                  <col className="w-[90px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[120px]" />
+                  <col className="w-[100px]" />
+                </colgroup>
                 <thead className="bg-muted/50 border-b border-border">
                   <tr>
                     <th className="text-left py-3 px-4 font-medium text-muted-foreground">User</th>
@@ -392,63 +400,83 @@ export default function UsersManagement() {
                         className="border-b border-border hover:bg-muted/30 transition-colors"
                       >
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+                          <div className="cell-content gap-3">
+                            <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center shrink-0">
                               <Users className="h-5 w-5 text-accent" />
                             </div>
-                            <div>
-                              <p className="font-medium text-foreground">
+                            <div className="cell-text">
+                              <p className="font-medium text-foreground text-truncate w-truncate-md"
+                                 title={user.full_name || user.email}>
                                 {user.full_name || user.email.split('@')[0]}
                               </p>
-                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                              <p className="text-sm text-muted-foreground text-truncate w-truncate-lg"
+                                 title={user.email}>{user.email}</p>
                               {user.country && (
                                 <div className="flex items-center gap-1 mt-1">
-                                  <MapPin className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground">{user.country}</span>
+                                  <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                                  <span className="text-xs text-muted-foreground text-truncate">{user.country}</span>
                                 </div>
                               )}
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={cn(
-                            'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border',
-                            getStatusColor(user.activity_status)
-                          )}>
-                            {user.activity_status}
-                          </span>
-                          {user.role && user.role !== 'user' && (
-                            <span className="block mt-1 text-xs text-accent">
-                              {user.role}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-foreground">
-                              {user.total_bills || 0}
-                            </span>
+                          <div className="cell-content gap-2">
+                            <div className="cell-text">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={cn(
+                                  'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shrink-0',
+                                  getStatusColor(user.activity_status)
+                                )}>
+                                  {user.activity_status}
+                                </span>
+                              </div>
+                              {user.role && user.role !== 'user' && (
+                                <div className="flex items-center gap-1">
+                                  <div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"></div>
+                                  <span className="text-xs font-medium text-accent capitalize text-truncate">
+                                    {user.role}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          {user.total_spent && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              ${user.total_spent.toLocaleString()}
-                            </p>
-                          )}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-sm text-foreground">
+                          <div className="cell-content gap-1">
+                            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <div className="cell-text">
+                              <span className="text-sm text-foreground">
+                                {user.total_bills || 0}
+                              </span>
+                              {user.total_spent && (
+                                <p className="text-xs text-muted-foreground mt-1 text-truncate">
+                                  ${user.total_spent.toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-sm text-foreground text-truncate">
                             {formatBytes(user.storage_used_bytes)}
                           </span>
                         </td>
                         <td className="py-3 px-4">
                           {user.last_login_at ? (
-                            <div>
-                              <p className="text-sm text-foreground">
-                                {new Date(user.last_login_at).toLocaleDateString()}
+                            <div className="cell-text">
+                              <p className="text-sm text-foreground text-truncate">
+                                {new Date(user.last_login_at).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: '2-digit'
+                                })}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(user.last_login_at).toLocaleTimeString()}
+                              <p className="text-xs text-muted-foreground text-truncate">
+                                {new Date(user.last_login_at).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
                               </p>
                             </div>
                           ) : (
@@ -456,13 +484,13 @@ export default function UsersManagement() {
                           )}
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
+                          <div className="action-buttons">
                             <button
                               onClick={() => {
                                 setSelectedUser(user);
                                 setShowUserModal(true);
                               }}
-                              className="p-1 hover:bg-accent/20 rounded transition-colors"
+                              className="hover:bg-accent/20 rounded transition-colors"
                               title="View Details"
                             >
                               <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
@@ -470,7 +498,7 @@ export default function UsersManagement() {
                             <button
                               onClick={() => handleUserAction(user.id, 'suspend')}
                               disabled={actionLoading === user.id}
-                              className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
+                              className="hover:bg-yellow-500/20 rounded transition-colors"
                               title="Suspend User"
                             >
                               <UserX className="h-4 w-4 text-muted-foreground hover:text-yellow-500" />
@@ -478,7 +506,7 @@ export default function UsersManagement() {
                             <button
                               onClick={() => handleUserAction(user.id, 'delete')}
                               disabled={actionLoading === user.id}
-                              className="p-1 hover:bg-destructive/20 rounded transition-colors"
+                              className="hover:bg-destructive/20 rounded transition-colors"
                               title="Delete User"
                             >
                               <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />

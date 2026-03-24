@@ -62,7 +62,6 @@ const actionTypes = [
   'admin.user_activate',
   'admin.user_delete',
   'admin.bill_delete',
-  'admin.bill_archive',
   'admin.settings_update',
   'admin.login',
   'admin.logout',
@@ -431,8 +430,17 @@ export default function ActivityLogs() {
 
       {/* Activity Logs Table */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="table-responsive">
+          <table className="w-full min-w-[900px] table-fixed">
+            <colgroup>
+              <col className="w-[140px]" />
+              <col className="w-1/5 min-w-[160px]" />
+              <col className="w-1/5 min-w-[140px]" />
+              <col className="w-1/5 min-w-[120px]" />
+              <col className="w-[100px]" />
+              <col className="w-[120px]" />
+              <col className="w-[80px]" />
+            </colgroup>
             <thead className="bg-muted/50 border-b border-border">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Timestamp</th>
@@ -464,81 +472,95 @@ export default function ActivityLogs() {
                     className="border-b border-border hover:bg-muted/30 transition-colors"
                   >
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <div className="text-sm">
-                          <p className="text-foreground">
-                            {new Date(log.timestamp || log.created_at).toLocaleDateString()}
+                      <div className="cell-content gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="text-sm cell-text">
+                          <p className="text-foreground text-truncate">
+                            {new Date(log.timestamp || log.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric'
+                            })}
                           </p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(log.timestamp || log.created_at).toLocaleTimeString()}
+                          <p className="text-xs text-muted-foreground text-truncate">
+                            {new Date(log.timestamp || log.created_at).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       {log.user_email || log.admin_id ? (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div className="text-sm min-w-0">
-                            <p className="text-foreground truncate">
+                        <div className="cell-content gap-2">
+                          <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <div className="text-sm cell-text">
+                            <p className="text-foreground text-truncate w-truncate-sm"
+                               title={log.user_full_name || log.user_email || log.admin_id}>
                               {log.user_full_name || log.user_email?.split('@')[0] || log.admin_id}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {log.user_email || `Admin: ${log.admin_id}`}
+                            <p className="text-xs text-muted-foreground text-truncate w-truncate-sm"
+                               title={log.user_email || `Admin: ${log.admin_id}`}>
+                              {log.user_email || `Admin: ${log.admin_id?.slice(0, 8)}...`}
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2">
-                          <Database className="h-4 w-4 text-muted-foreground" />
+                        <div className="cell-content gap-2">
+                          <Database className="h-4 w-4 text-muted-foreground shrink-0" />
                           <span className="text-sm text-muted-foreground">System</span>
                         </div>
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("p-1 rounded", getActionColor(log.action))}>
+                      <div className="cell-content gap-2">
+                        <div className={cn("p-1 rounded shrink-0", getActionColor(log.action))}>
                           {getActionIcon(log.action)}
                         </div>
-                        <span className="text-sm text-foreground">{log.action}</span>
+                        <span className="text-sm text-foreground text-truncate w-truncate-sm" title={log.action}>
+                          {log.action}
+                        </span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-sm">
-                        <p className="text-foreground capitalize">{log.resource_type}</p>
+                      <div className="text-sm cell-text">
+                        <p className="text-foreground capitalize text-truncate">{log.resource_type}</p>
                         {log.resource_id && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            ID: {log.resource_id}
+                          <p className="text-xs text-muted-foreground text-truncate w-truncate-sm"
+                             title={`ID: ${log.resource_id}`}>
+                            ID: {log.resource_id.slice(0, 8)}...
                           </p>
                         )}
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <span className={cn(
-                        'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
+                        'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border status-badge',
                         getSeverityColor(log.severity || 'info')
                       )}>
                         {getSeverityIcon(log.severity || 'info')}
-                        {log.severity || 'info'}
+                        <span className="hidden sm:inline">{log.severity || 'info'}</span>
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-1">
-                        <Globe className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
+                      <div className="cell-content gap-1">
+                        <Globe className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <span className="text-sm text-muted-foreground text-truncate"
+                              title={log.ip_address || 'N/A'}>
                           {log.ip_address || 'N/A'}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <button
-                        onClick={() => viewLogDetails(log)}
-                        className="p-2 text-accent hover:text-accent/80 hover:bg-accent/10 rounded-lg transition-colors"
-                        title="View Details"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                      <div className="action-buttons">
+                        <button
+                          onClick={() => viewLogDetails(log)}
+                          className="hover:bg-accent/10 rounded-lg transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4 text-accent" />
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))

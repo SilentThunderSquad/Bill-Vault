@@ -14,7 +14,6 @@ import {
   Database,
   BarChart3,
   Folder,
-  Archive,
   RefreshCw,
   Filter
 } from 'lucide-react';
@@ -484,8 +483,17 @@ export default function StorageManagement() {
 
       {/* Files Table */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="table-responsive">
+          <table className="w-full min-w-[900px] table-fixed">
+            <colgroup>
+              <col className="w-[50px]" />
+              <col className="w-1/3 min-w-[250px]" />
+              <col className="w-1/5 min-w-[160px]" />
+              <col className="w-[100px]" />
+              <col className="w-[120px]" />
+              <col className="w-[100px]" />
+              <col className="w-[120px]" />
+            </colgroup>
             <thead className="bg-muted/50 border-b border-border">
               <tr>
                 <th className="text-left py-3 px-4">
@@ -543,17 +551,19 @@ export default function StorageManagement() {
                       />
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className={cn("p-2 rounded", getFileTypeColor(file.type, file.is_thumbnail))}>
+                      <div className="cell-content gap-3">
+                        <div className={cn("p-2 rounded shrink-0", getFileTypeColor(file.type, file.is_thumbnail))}>
                           {getFileIcon(file.type, file.is_thumbnail)}
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate">{file.name}</p>
-                          <p className="text-sm text-muted-foreground">
+                        <div className="cell-text">
+                          <p className="font-medium text-foreground text-truncate w-truncate-lg" title={file.name}>
+                            {file.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground text-truncate">
                             {file.type} {file.is_thumbnail && '(thumbnail)'}
                           </p>
                           {file.bill_title && (
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="text-xs text-muted-foreground text-truncate w-truncate-md" title={file.bill_title}>
                               Bill: {file.bill_title}
                             </p>
                           )}
@@ -562,60 +572,68 @@ export default function StorageManagement() {
                     </td>
                     <td className="py-3 px-4">
                       {file.user_email ? (
-                        <div className="text-sm">
-                          <p className="text-foreground">{file.user_email}</p>
+                        <div className="text-sm cell-text">
+                          <p className="text-foreground text-truncate w-truncate-md" title={file.user_email}>
+                            {file.user_email}
+                          </p>
                         </div>
                       ) : (
-                        <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-500 rounded">
+                        <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-500 rounded status-badge">
                           Orphaned
                         </span>
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="text-sm text-foreground">{formatBytes(file.size)}</span>
+                      <span className="text-sm text-foreground text-truncate">{formatBytes(file.size)}</span>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-sm">
-                        <p className="text-foreground">
-                          {new Date(file.uploaded_at).toLocaleDateString()}
+                      <div className="text-sm cell-text">
+                        <p className="text-foreground text-truncate">
+                          {new Date(file.uploaded_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(file.uploaded_at).toLocaleTimeString()}
+                        <p className="text-xs text-muted-foreground text-truncate">
+                          {new Date(file.uploaded_at).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                         </p>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       {file.last_accessed_at ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Active
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500 status-badge">
+                          <CheckCircle className="h-3 w-3 mr-1 shrink-0" />
+                          <span className="text-truncate">Active</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500">
-                          <Clock className="h-3 w-3 mr-1" />
-                          Unused
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500 status-badge">
+                          <Clock className="h-3 w-3 mr-1 shrink-0" />
+                          <span className="text-truncate">Unused</span>
                         </span>
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-1">
+                      <div className="action-buttons">
                         <button
                           onClick={() => handleFileAction(file.id, 'preview')}
-                          className="p-1 hover:bg-accent/20 rounded transition-colors"
+                          className="hover:bg-accent/20 rounded transition-colors"
                           title="Preview"
                         >
                           <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
                         </button>
                         <button
                           onClick={() => handleFileAction(file.id, 'download')}
-                          className="p-1 hover:bg-blue-500/20 rounded transition-colors"
+                          className="hover:bg-blue-500/20 rounded transition-colors"
                           title="Download"
                         >
                           <Download className="h-4 w-4 text-muted-foreground hover:text-blue-500" />
                         </button>
                         <button
                           onClick={() => handleFileAction(file.id, 'delete')}
-                          className="p-1 hover:bg-destructive/20 rounded transition-colors"
+                          className="hover:bg-destructive/20 rounded transition-colors"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />

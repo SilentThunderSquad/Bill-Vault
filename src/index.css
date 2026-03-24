@@ -243,3 +243,310 @@
   transform: translateY(-10px);
   transition: opacity 150ms ease-in, transform 150ms ease-in;
 }
+
+/* =============================================
+   RESPONSIVE DESIGN UTILITIES
+   Comprehensive utilities for handling long content and responsiveness
+   ============================================= */
+
+/* Text Truncation Utilities */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: calc(1.4em * 2);
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: calc(1.4em * 3);
+}
+
+.text-truncate-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: calc(1.4em * 4);
+}
+
+/* Responsive Width Utilities */
+.w-truncate-sm {
+  max-width: 120px;
+}
+
+.w-truncate-md {
+  max-width: 180px;
+}
+
+.w-truncate-lg {
+  max-width: 250px;
+}
+
+.w-truncate-xl {
+  max-width: 350px;
+}
+
+/* Table Responsive Utilities */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-fixed {
+  table-layout: fixed;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Cell Content Utilities */
+.cell-content {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  max-width: 100%;
+}
+
+.cell-text {
+  flex: 1;
+  min-width: 0; /* Allow flex item to shrink below content size */
+}
+
+/* Responsive Grid Utilities */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid-responsive-sm {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-responsive-lg {
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+/* Card Responsive Utilities */
+.card-responsive {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card-responsive .card-header {
+  flex-shrink: 0;
+}
+
+.card-responsive .card-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Container Width Utilities */
+.container-balanced {
+  max-width: min(100vw - 2rem, 1400px);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Mobile-First Responsive Breakpoints */
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+
+  .md-text-truncate-expand .text-truncate,
+  .md-text-truncate-expand .text-truncate-2,
+  .md-text-truncate-expand .text-truncate-3 {
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    display: block;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    max-height: unset;
+  }
+}
+
+/* Content Break Utilities */
+.break-words {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.break-all {
+  word-break: break-all;
+}
+
+/* Flex Layout Utilities */
+.flex-responsive {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.flex-responsive > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Button Responsive Utilities */
+.btn-responsive {
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .btn-responsive {
+    padding: 0.75rem 1.25rem;
+    min-height: 48px;
+  }
+}
+
+/* Loading State Utilities */
+.loading-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--background);
+  opacity: 0.8;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+/* Status Badge Utilities */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+/* Action Button Container */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.action-buttons button {
+  padding: 0.5rem;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+@media (max-width: 640px) {
+  .action-buttons button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+}
+
+/* Modal Responsive Utilities */
+.modal-responsive {
+  max-height: 90vh;
+  max-height: 90dvh; /* Use dynamic viewport height on mobile */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-responsive .modal-header {
+  flex-shrink: 0;
+  padding: 1.5rem 1.5rem 0;
+}
+
+.modal-responsive .modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.modal-responsive .modal-footer {
+  flex-shrink: 0;
+  padding: 0 1.5rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .modal-responsive {
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}

@@ -16,7 +16,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Archive,
   Tag,
   Image
 } from 'lucide-react';
@@ -155,7 +154,7 @@ export default function BillsManagement() {
            matchesWarranty && matchesDateRange && matchesMinAmount && matchesMaxAmount;
   });
 
-  const handleBillAction = async (billId: string, action: 'view' | 'download' | 'delete' | 'archive') => {
+  const handleBillAction = async (billId: string, action: 'view' | 'download' | 'delete') => {
     try {
       setActionLoading(billId);
 
@@ -222,42 +221,6 @@ export default function BillsManagement() {
               console.error('Error deleting bill:', error);
               toast.error('Failed to delete bill');
             }
-          }
-          break;
-        case 'archive':
-          try {
-            const currentUser = (await supabase.auth.getUser()).data.user;
-
-            // Update bill status to archived
-            const { error: archiveError } = await supabase
-              .from('bills')
-              .update({
-                archived: true,
-                archived_at: new Date().toISOString(),
-                archived_by: currentUser?.id
-              })
-              .eq('id', billId);
-
-            if (archiveError) throw archiveError;
-
-            // Log admin action
-            const bill = bills.find(b => b.id === billId);
-            await supabase.from('admin_activity_logs').insert({
-              admin_id: currentUser?.id,
-              action: 'admin.bill_archive',
-              resource_type: 'bill',
-              resource_id: billId,
-              details: {
-                title: bill?.title,
-                user_email: bill?.user_email
-              }
-            });
-
-            setBills(prev => prev.filter(b => b.id !== billId));
-            toast.success('Bill archived successfully');
-          } catch (error) {
-            console.error('Error archiving bill:', error);
-            toast.error('Failed to archive bill');
           }
           break;
       }
@@ -465,8 +428,17 @@ export default function BillsManagement() {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full">
+            <div className="hidden lg:block table-responsive">
+              <table className="w-full min-w-[900px] table-fixed">
+                <colgroup>
+                  <col className="w-1/4 min-w-[250px]" />
+                  <col className="w-1/5 min-w-[160px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[120px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[80px]" />
+                  <col className="w-[100px]" />
+                </colgroup>
                 <thead className="bg-muted/50 border-b border-border">
                   <tr>
                     <th className="text-left py-3 px-4 font-medium text-muted-foreground">Bill</th>
@@ -498,98 +470,105 @@ export default function BillsManagement() {
                         className="border-b border-border hover:bg-muted/30 transition-colors"
                       >
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
+                          <div className="cell-content gap-3">
                             {bill.thumbnail_url ? (
                               <img
                                 src={bill.thumbnail_url}
                                 alt="Bill thumbnail"
-                                className="w-10 h-10 rounded object-cover"
+                                className="w-10 h-10 rounded object-cover shrink-0"
                               />
                             ) : (
-                              <div className="w-10 h-10 bg-accent/20 rounded flex items-center justify-center">
+                              <div className="w-10 h-10 bg-accent/20 rounded flex items-center justify-center shrink-0">
                                 <FileText className="h-5 w-5 text-accent" />
                               </div>
                             )}
-                            <div className="min-w-0">
-                              <p className="font-medium text-foreground truncate">
+                            <div className="cell-text">
+                              <p className="font-medium text-foreground text-truncate w-truncate-lg" title={bill.title}>
                                 {bill.title}
                               </p>
                               {bill.vendor && (
-                                <p className="text-sm text-muted-foreground truncate">
+                                <p className="text-sm text-muted-foreground text-truncate w-truncate-md" title={bill.vendor}>
                                   {bill.vendor}
                                 </p>
                               )}
                               {bill.category && (
                                 <div className="flex items-center gap-1 mt-1">
-                                  <Tag className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground">{bill.category}</span>
+                                  <Tag className="h-3 w-3 text-muted-foreground shrink-0" />
+                                  <span className="text-xs text-muted-foreground text-truncate">{bill.category}</span>
                                 </div>
                               )}
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">
+                          <div className="cell-content gap-2">
+                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <div className="cell-text">
+                              <p className="text-sm font-medium text-foreground text-truncate w-truncate-sm"
+                                 title={bill.user_full_name || bill.user_email}>
                                 {bill.user_full_name || bill.user_email.split('@')[0]}
                               </p>
-                              <p className="text-xs text-muted-foreground truncate">
+                              <p className="text-xs text-muted-foreground text-truncate w-truncate-sm"
+                                 title={bill.user_email}>
                                 {bill.user_email}
                               </p>
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm font-medium text-foreground">
+                          <div className="cell-content gap-1">
+                            <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm font-medium text-foreground text-truncate">
                               {formatCurrency(bill.total_amount, bill.currency)}
                             </span>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
+                          <div className="cell-content gap-2">
                             <span className={cn(
-                              'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border',
+                              'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border shrink-0',
                               getStatusColor(bill.processing_status)
                             )}>
                               {getStatusIcon(bill.processing_status)}
-                              {bill.processing_status}
+                              <span className="hidden md:inline">{bill.processing_status}</span>
                             </span>
                             {bill.has_warranty && (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-500">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-500 shrink-0"
+                                    title="Has Warranty">
                                 W
                               </span>
                             )}
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-foreground">
-                              {new Date(bill.date).toLocaleDateString()}
+                          <div className="cell-content gap-1">
+                            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm text-foreground text-truncate">
+                              {new Date(bill.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: '2-digit'
+                              })}
                             </span>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
-                            <Image className="h-4 w-4 text-muted-foreground" />
-                            <div className="text-sm">
-                              <p className="text-foreground">{bill.file_type}</p>
-                              <p className="text-xs text-muted-foreground">
+                          <div className="cell-content gap-1">
+                            <Image className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <div className="text-sm min-w-0">
+                              <p className="text-foreground text-truncate">{bill.file_type}</p>
+                              <p className="text-xs text-muted-foreground text-truncate">
                                 {formatFileSize(bill.file_size)}
                               </p>
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
+                          <div className="action-buttons">
                             <button
                               onClick={() => handleBillAction(bill.id, 'view')}
                               disabled={actionLoading === bill.id}
-                              className="p-1 hover:bg-accent/20 rounded transition-colors"
+                              className="hover:bg-accent/20 rounded transition-colors"
                               title="View Details"
                             >
                               <Eye className="h-4 w-4 text-muted-foreground hover:text-accent" />
@@ -597,23 +576,15 @@ export default function BillsManagement() {
                             <button
                               onClick={() => handleBillAction(bill.id, 'download')}
                               disabled={actionLoading === bill.id || !bill.file_url}
-                              className="p-1 hover:bg-blue-500/20 rounded transition-colors"
+                              className="hover:bg-blue-500/20 rounded transition-colors"
                               title="Download File"
                             >
                               <Download className="h-4 w-4 text-muted-foreground hover:text-blue-500" />
                             </button>
                             <button
-                              onClick={() => handleBillAction(bill.id, 'archive')}
-                              disabled={actionLoading === bill.id}
-                              className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
-                              title="Archive Bill"
-                            >
-                              <Archive className="h-4 w-4 text-muted-foreground hover:text-yellow-500" />
-                            </button>
-                            <button
                               onClick={() => handleBillAction(bill.id, 'delete')}
                               disabled={actionLoading === bill.id}
-                              className="p-1 hover:bg-destructive/20 rounded transition-colors"
+                              className="hover:bg-destructive/20 rounded transition-colors"
                               title="Delete Bill"
                             >
                               <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
@@ -628,9 +599,9 @@ export default function BillsManagement() {
             </div>
 
             {/* Mobile Card View */}
-            <div className="lg:hidden">
+            <div className="lg:hidden space-y-4 p-4">
               {filteredBills.length === 0 ? (
-                <div className="text-center py-12 px-4 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground">
                   <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
                   <p className="text-lg mb-2">
                     {Object.values(filters).some(f => f !== 'all' && f !== '')
@@ -640,13 +611,13 @@ export default function BillsManagement() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="space-y-4">
                   {filteredBills.map((bill) => (
                     <motion.div
                       key={bill.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-4 space-y-3"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-background border border-border rounded-lg p-4 space-y-3 card-responsive"
                     >
                       {/* Bill Header */}
                       <div className="flex items-start gap-3">
@@ -654,73 +625,111 @@ export default function BillsManagement() {
                           <img
                             src={bill.thumbnail_url}
                             alt="Bill thumbnail"
-                            className="w-12 h-12 rounded object-cover flex-shrink-0"
+                            className="w-12 h-12 rounded object-cover shrink-0"
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-accent/20 rounded flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 bg-accent/20 rounded flex items-center justify-center shrink-0">
                             <FileText className="h-6 w-6 text-accent" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base text-foreground truncate">
+                          <h3 className="font-semibold text-base text-foreground text-truncate-2 break-words" title={bill.title}>
                             {bill.title}
                           </h3>
                           {bill.vendor && (
-                            <p className="text-sm text-muted-foreground truncate">
+                            <p className="text-sm text-muted-foreground text-truncate break-words" title={bill.vendor}>
                               {bill.vendor}
                             </p>
                           )}
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
                             <span className={cn(
-                              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border',
+                              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border status-badge',
                               getStatusColor(bill.processing_status)
                             )}>
                               {getStatusIcon(bill.processing_status)}
                               {bill.processing_status}
                             </span>
                             {bill.has_warranty && (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-500">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-500 status-badge">
                                 Warranty
+                              </span>
+                            )}
+                            {bill.category && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-muted text-muted-foreground status-badge">
+                                <Tag className="h-3 w-3" />
+                                {bill.category}
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
 
-                      {/* Bill Details */}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="font-medium text-foreground truncate">
+                      {/* Bill Details Grid */}
+                      <div className="grid grid-cols-2 gap-3 text-sm py-3 border-t border-border">
+                        <div className="cell-content gap-2">
+                          <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <div className="cell-text">
+                            <p className="font-medium text-foreground text-truncate" title={bill.user_full_name || bill.user_email}>
                               {bill.user_full_name || bill.user_email.split('@')[0]}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="text-xs text-muted-foreground text-truncate" title={bill.user_email}>
                               {bill.user_email}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="font-medium text-foreground">
+                        <div className="cell-content gap-2">
+                          <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="font-medium text-foreground text-truncate">
                             {formatCurrency(bill.total_amount, bill.currency)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-foreground">
-                            {new Date(bill.date).toLocaleDateString()}
+                        <div className="cell-content gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="text-foreground text-truncate">
+                            {new Date(bill.date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Image className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <div>
-                            <p className="text-foreground">{bill.file_type}</p>
-                            <p className="text-xs text-muted-foreground">
+                        <div className="cell-content gap-2">
+                          <Image className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <div className="cell-text">
+                            <p className="text-foreground text-truncate">{bill.file_type}</p>
+                            <p className="text-xs text-muted-foreground text-truncate">
                               {formatFileSize(bill.file_size)}
                             </p>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Action Buttons - Mobile Optimized */}
+                      <div className="flex items-center gap-2 pt-3 border-t border-border">
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'view')}
+                          disabled={actionLoading === bill.id}
+                          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-accent/10 text-accent rounded-lg text-sm font-medium hover:bg-accent/20 transition-colors btn-responsive"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'download')}
+                          disabled={actionLoading === bill.id || !bill.file_url}
+                          className="p-2.5 hover:bg-blue-500/20 text-blue-600 rounded-lg transition-colors btn-responsive"
+                          title="Download"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleBillAction(bill.id, 'delete')}
+                          disabled={actionLoading === bill.id}
+                          className="p-2.5 hover:bg-destructive/20 text-destructive rounded-lg transition-colors btn-responsive"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
 
                       {/* Category and Tags */}
@@ -752,14 +761,6 @@ export default function BillsManagement() {
                         >
                           <Download className="h-4 w-4" />
                           Download
-                        </button>
-                        <button
-                          onClick={() => handleBillAction(bill.id, 'archive')}
-                          disabled={actionLoading === bill.id}
-                          className="flex items-center gap-1 px-3 py-2 text-sm bg-yellow-500/10 text-yellow-500 rounded-lg hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
-                        >
-                          <Archive className="h-4 w-4" />
-                          Archive
                         </button>
                         <button
                           onClick={() => handleBillAction(bill.id, 'delete')}
