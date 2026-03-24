@@ -260,7 +260,94 @@ export default function Profile() {
             ) : (
               <>
                 {/* Avatar Section */}
-                <div className="flex items-start gap-6">
+                {/* Mobile Layout - Vertical centered */}
+                <div className="block sm:hidden space-y-4">
+                  {/* Profile Image - Centered in first row */}
+                  <div className="flex justify-center">
+                    <div className="relative">
+                      <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                        {currentAvatarUrl && !imageLoadError ? (
+                          <img
+                            src={currentAvatarUrl}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                            onLoad={() => {
+                              console.log('✅ Profile image loaded successfully!', currentAvatarUrl);
+                              setImageLoadError(false);
+                            }}
+                            onError={() => {
+                              console.log('❌ Image failed to load:', currentAvatarUrl, 'Retry count:', retryCount);
+                              if (retryCount < 2 && currentAvatarUrl?.includes('googleusercontent.com')) {
+                                // Retry Google images with a slight delay
+                                setTimeout(() => {
+                                  setRetryCount(prev => prev + 1);
+                                  setImageLoadError(false);
+                                }, 1000 * (retryCount + 1));
+                              } else {
+                                setImageLoadError(true);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <User className="h-12 w-12 text-muted-foreground" />
+                        )}
+                      </div>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingAvatar}
+                        className="absolute -bottom-1 -right-1 p-2 bg-accent text-white rounded-full hover:bg-accent/90 transition-colors disabled:opacity-50"
+                        aria-label="Upload profile picture"
+                      >
+                        {uploadingAvatar ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Camera className="h-4 w-4" />
+                        )}
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Profile Details - Full width second row onwards */}
+                  <div className="space-y-3 text-center">
+                    <div className="space-y-2">
+                      <h2 className="text-xl font-semibold text-foreground break-words leading-tight">
+                        {displayName}
+                      </h2>
+                      <p className="text-sm text-muted-foreground break-all leading-relaxed px-4">
+                        {user?.email}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        <span className="break-words">
+                          Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short'
+                          }) : 'N/A'}
+                        </span>
+                      </div>
+
+                      {profileForm.country && (
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="break-words">{profileForm.country}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout - Side by side (original design) */}
+                <div className="hidden sm:flex items-start gap-6">
                   <div className="relative">
                     <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
                       {currentAvatarUrl && !imageLoadError ? (
