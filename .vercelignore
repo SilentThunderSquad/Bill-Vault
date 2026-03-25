@@ -43,8 +43,8 @@ test/
 # Memory files
 memory/
 
-# Scripts
-scripts/
+# Scripts (commented out to allow sitemap generation)
+# scripts/
 
 # Supabase local files
 supabase/.temp/
