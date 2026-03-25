@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.svg', 'icons/*.svg', 'icons/*.png', 'robots.txt'],
+      includeAssets: ['favicon.svg', 'icons/*.svg', 'icons/*.png', 'robots.txt', 'sitemap.xml'],
       manifest: {
         id: '/',
         name: 'Bill Vault',
@@ -156,6 +156,13 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 600,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {

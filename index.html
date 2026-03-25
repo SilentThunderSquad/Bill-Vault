@@ -25,7 +25,7 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://personal-bill-vault.vercel.app/" />
+    <meta property="og:url" content="https://bill-vault-sts.vercel.app/" />
     <meta property="og:title" content="Bill Vault - Never Lose a Warranty Again" />
     <meta property="og:description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning." />
     <meta property="og:image" content="/og-image.png" />
@@ -33,7 +33,7 @@
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://personal-bill-vault.vercel.app/" />
+    <meta property="twitter:url" content="https://bill-vault-sts.vercel.app/" />
     <meta property="twitter:title" content="Bill Vault - Never Lose a Warranty Again" />
     <meta property="twitter:description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning." />
     <meta property="twitter:image" content="/og-image.png" />
@@ -43,12 +43,17 @@
     <meta name="msapplication-TileColor" content="#1E1B4B" />
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://personal-bill-vault.vercel.app/" />
+    <link rel="canonical" href="https://bill-vault-sts.vercel.app/" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" /></noscript>
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    <link rel="preload" href="/og-image.png" as="image" />
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -57,7 +62,7 @@
       "@type": "WebApplication",
       "name": "Bill Vault",
       "description": "Store bills securely, track product warranties, and get alerts before they expire.",
-      "url": "https://personal-bill-vault.vercel.app",
+      "url": "https://bill-vault-sts.vercel.app",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web",
       "offers": {

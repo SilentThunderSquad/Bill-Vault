@@ -32,11 +32,11 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Never Lose a{' '}
+          Best{' '}
           <span className="bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">
-            Warranty
+            Warranty Tracker App
           </span>{' '}
-          Again
+          - Never Lose a Warranty Again
         </motion.h1>
 
         <motion.p
@@ -45,8 +45,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Upload your bills, automatically extract invoice data with OCR, track warranty expiry dates,
-          and receive smart alerts before your warranties run out.
+          The ultimate bill management app and warranty tracker. Upload your receipts, automatically extract invoice data with OCR technology, track warranty expiry dates for all your products, and receive smart alerts before warranties expire. Free digital receipt storage solution.
         </motion.p>
 
         <motion.div

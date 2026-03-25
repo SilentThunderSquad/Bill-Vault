@@ -2,12 +2,36 @@ import { motion } from 'framer-motion';
 import { ScanLine, ShieldCheck, BellDot, Lock, LayoutDashboard, Tags } from 'lucide-react';
 
 const features = [
-  { icon: ScanLine, title: 'Bill Scanner', description: 'Powered by Tesseract.js OCR to auto-extract bill details from photos.' },
-  { icon: ShieldCheck, title: 'Warranty Tracker', description: 'Automatically calculates and tracks warranty expiry for every product.' },
-  { icon: BellDot, title: 'Smart Alerts', description: 'Email and in-app notifications 30, 7, and 1 day before warranty expires.' },
-  { icon: Lock, title: 'Secure Digital Vault', description: 'Your bills are encrypted and stored safely in the cloud with Supabase.' },
-  { icon: LayoutDashboard, title: 'Organized Dashboard', description: 'See all your bills, active warranties, and upcoming expirations at a glance.' },
-  { icon: Tags, title: 'Smart Categories', description: 'Organize bills by category: Electronics, Appliances, Furniture, and more.' },
+  {
+    icon: ScanLine,
+    title: 'OCR Bill Scanner & Text Extraction',
+    description: 'Advanced OCR technology powered by Tesseract.js automatically extracts bill details, amounts, dates, and vendor information from photos. Save time with smart bill scanning.'
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Warranty Tracker & Product Management',
+    description: 'Automatically track warranty expiry dates for all your products. Never miss a warranty claim again with our intelligent warranty tracking system.'
+  },
+  {
+    icon: BellDot,
+    title: 'Smart Warranty Alerts & Notifications',
+    description: 'Get email and in-app notifications 30, 7, and 1 day before warranty expires. Customizable alert preferences ensure you never miss important dates.'
+  },
+  {
+    icon: Lock,
+    title: 'Secure Digital Receipt Storage',
+    description: 'Enterprise-grade security with encrypted cloud storage via Supabase. Your bills and personal documents are protected with bank-level encryption.'
+  },
+  {
+    icon: LayoutDashboard,
+    title: 'Organized Bill Management Dashboard',
+    description: 'View all your bills, active warranties, and upcoming expirations in one organized dashboard. Search, filter, and manage your documents effortlessly.'
+  },
+  {
+    icon: Tags,
+    title: 'Smart Bill Categories & Organization',
+    description: 'Automatically categorize bills by type: Electronics, Appliances, Furniture, and more. Custom tags and folders keep everything organized.'
+  },
 ];
 
 export function FeaturesSection() {
@@ -21,9 +45,11 @@ export function FeaturesSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Powerful Features</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
+            Bill Management App Features - Warranty Tracker & OCR Scanner
+          </h2>
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
-            Everything you need to manage your bills and warranties
+            Everything you need to manage bills, track warranties, and store receipts digitally. Professional-grade bill management with smart automation.
           </p>
         </motion.div>
 

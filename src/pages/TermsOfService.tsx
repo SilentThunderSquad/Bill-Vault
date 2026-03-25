@@ -1,21 +1,14 @@
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Scale, UserCheck, Shield, AlertTriangle, FileText, Users, ArrowLeft } from 'lucide-react';
+import { SEOHead } from '@/components/seo/SEOHead';
+import { createBreadcrumbSchema } from '@/components/seo/schemas';
 
 export default function TermsOfService() {
-  useEffect(() => {
-    document.title = 'Terms of Service - Bill Vault';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Terms of Service for Bill Vault - Understand your rights and responsibilities when using our bill management and warranty tracking service.');
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = 'Terms of Service for Bill Vault - Understand your rights and responsibilities when using our bill management and warranty tracking service.';
-      document.head.appendChild(meta);
-    }
-  }, []);
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Home', url: 'https://bill-vault-sts.vercel.app/' },
+    { name: 'Terms of Service', url: 'https://bill-vault-sts.vercel.app/terms-of-service' }
+  ]);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -337,7 +330,15 @@ export default function TermsOfService() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-accent/5 via-transparent to-background">
+    <>
+      <SEOHead
+        title="Terms of Service - Bill Vault App Legal Agreement"
+        description="Terms of Service for Bill Vault warranty tracker and bill management app. Understand your rights and responsibilities when using our digital receipt storage service."
+        keywords="terms of service, bill vault terms, warranty tracker legal, bill management app terms, user agreement, app terms and conditions"
+        url="https://bill-vault-sts.vercel.app/terms-of-service"
+        schema={breadcrumbSchema}
+      />
+      <div className="min-h-screen bg-gradient-to-b from-accent/5 via-transparent to-background">
       {/* Navigation Bar */}
       <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -465,5 +466,6 @@ export default function TermsOfService() {
         </motion.div>
       </div>
     </div>
+    </>
   );
 }

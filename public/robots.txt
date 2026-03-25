@@ -1,16 +1,25 @@
 # Robots.txt for Bill Vault
-# https://personal-bill-vault.vercel.app
+# https://bill-vault-sts.vercel.app
 
 User-agent: *
 Allow: /
+
+# Disallow authenticated pages
 Disallow: /dashboard
 Disallow: /bills
 Disallow: /settings
+Disallow: /profile
+Disallow: /notifications
+Disallow: /admin
 
 # Allow crawling of public pages
 Allow: /login
 Allow: /register
-Allow: /forgot-password
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+# Crawl delay (optional - set to 1 second)
+Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://personal-bill-vault.vercel.app/sitemap.xml
+Sitemap: https://bill-vault-sts.vercel.app/sitemap.xml

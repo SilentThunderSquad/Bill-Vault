@@ -1,21 +1,14 @@
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Shield, Lock, Eye, FileText, Users, Globe, ArrowLeft, Scale } from 'lucide-react';
+import { SEOHead } from '@/components/seo/SEOHead';
+import { createBreadcrumbSchema } from '@/components/seo/schemas';
 
 export default function PrivacyPolicy() {
-  useEffect(() => {
-    document.title = 'Privacy Policy - Bill Vault';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Privacy Policy for Bill Vault - Learn how we collect, use, and protect your personal information and bill data.');
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = 'Privacy Policy for Bill Vault - Learn how we collect, use, and protect your personal information and bill data.';
-      document.head.appendChild(meta);
-    }
-  }, []);
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Home', url: 'https://bill-vault-sts.vercel.app/' },
+    { name: 'Privacy Policy', url: 'https://bill-vault-sts.vercel.app/privacy-policy' }
+  ]);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -258,7 +251,15 @@ export default function PrivacyPolicy() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-accent/5 via-transparent to-background">
+    <>
+      <SEOHead
+        title="Privacy Policy - Bill Management App Data Protection"
+        description="Privacy Policy for Bill Vault warranty tracker app. Learn how we collect, use, and protect your personal information and bill data securely. GDPR & CCPA compliant."
+        keywords="privacy policy, bill vault privacy, warranty tracker privacy, data protection, bill management app privacy, OCR scanning privacy, GDPR compliance"
+        url="https://bill-vault-sts.vercel.app/privacy-policy"
+        schema={breadcrumbSchema}
+      />
+      <div className="min-h-screen bg-gradient-to-b from-accent/5 via-transparent to-background">
       {/* Navigation Bar */}
       <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -386,5 +387,6 @@ export default function PrivacyPolicy() {
         </motion.div>
       </div>
     </div>
+    </>
   );
 }
