@@ -145,7 +145,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true
       },
       devOptions: {
-        enabled: true
+        enabled: false // Disable PWA in development to avoid dev-dist dependency
       }
     })
   ],
