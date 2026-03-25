@@ -18,22 +18,11 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatRelativeDate } from '@/utils/formatters';
 import { cn } from '@/lib/utils';
 import { useWarrantyNotifications } from '@/hooks/useWarrantyNotifications';
 import { toast } from 'sonner';
-import type { Bill } from '@/types';
 
-interface WarrantyAlert {
-  id: string;
-  productName: string;
-  daysUntilExpiry: number;
-  expiryDate: string;
-  urgency: 'critical' | 'high' | 'medium' | 'low';
-  billId: string;
-}
-
-const ModernWarrantyAlertPanel = React.memo(({ bills: _bills }: { bills: Bill[] }) => {
+const ModernWarrantyAlertPanel = React.memo(() => {
   const {
     alerts,
     summary,

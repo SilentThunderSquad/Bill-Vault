@@ -82,7 +82,7 @@ export default function Dashboard() {
 
       {/* Modern Warranty Alert Panel - Clean, actionable warranty monitoring */}
       <motion.div variants={itemVariants}>
-        <ModernWarrantyAlertPanel bills={bills} />
+        <ModernWarrantyAlertPanel />
       </motion.div>
 
       <motion.div variants={itemVariants}>
