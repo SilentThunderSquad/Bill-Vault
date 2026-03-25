@@ -574,3 +574,103 @@
     height: calc(90vh - 120px) !important;
   }
 }
+
+/* Enhanced Button and Interactive Element Styles */
+@layer components {
+  /* Interactive element cursor states */
+  .cursor-pointer,
+  button,
+  [role="button"],
+  [tabindex="0"],
+  a,
+  label,
+  select,
+  input[type="radio"],
+  input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  .cursor-pointer:disabled,
+  button:disabled,
+  [role="button"]:disabled {
+    cursor: not-allowed !important;
+  }
+
+  /* Enhanced button hover effects */
+  .button-enhanced {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .button-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.6s;
+  }
+
+  .button-enhanced:hover::before {
+    left: 100%;
+  }
+
+  /* Card hover effects */
+  .card-interactive {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Focus styles for accessibility */
+  .focus-enhanced:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+
+  /* Icon hover animations */
+  .icon-hover {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .icon-hover:hover {
+    transform: scale(1.1);
+  }
+
+  /* Text hover effects */
+  .text-hover {
+    transition: color 0.2s ease-in-out;
+  }
+
+  /* Subtle shadow effects */
+  .shadow-subtle {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-subtle-hover:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Enhanced border transitions */
+  .border-enhanced {
+    transition: border-color 0.2s ease-in-out, border-width 0.2s ease-in-out;
+  }
+
+  /* Micro-interactions for better feedback */
+  .press-effect:active {
+    transform: scale(0.98);
+  }
+
+  /* Smooth background transitions */
+  .bg-smooth {
+    transition: background-color 0.2s ease-in-out;
+  }
+}

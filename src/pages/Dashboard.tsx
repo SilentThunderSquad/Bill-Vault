@@ -7,7 +7,7 @@ import { StatsGrid } from '@/components/dashboard/StatsGrid';
 import { RecentBills } from '@/components/dashboard/RecentBills';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { WarrantyTimeline } from '@/components/dashboard/WarrantyTimeline';
-import { EnhancedWarrantyAlertPanel } from '@/components/dashboard/EnhancedWarrantyAlertPanel';
+import { ModernWarrantyAlertPanel } from '@/components/dashboard/ModernWarrantyAlertPanel';
 import { MonthlyUploadsChart } from '@/components/dashboard/MonthlyUploadsChart';
 import { CategoryDistributionChart } from '@/components/dashboard/CategoryDistributionChart';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -80,9 +80,9 @@ export default function Dashboard() {
         </p>
       </motion.div>
 
-      {/* Enhanced Warranty Alert Panel - Shows comprehensive warranty notifications */}
+      {/* Modern Warranty Alert Panel - Clean, actionable warranty monitoring */}
       <motion.div variants={itemVariants}>
-        <EnhancedWarrantyAlertPanel bills={bills} />
+        <ModernWarrantyAlertPanel bills={bills} />
       </motion.div>
 
       <motion.div variants={itemVariants}>
