@@ -8,17 +8,20 @@ import { FileThumbnail } from './FileThumbnail';
 import { FilePreviewModal } from './FilePreviewModal';
 import { formatDate, formatCurrency, getDaysRemaining } from '@/utils/formatters';
 import { detectFileTypeFromUrl } from '@/utils/fileHelpers';
-import { ArrowLeft, Trash2, Edit2, Calendar, Store, Tag, Receipt, CreditCard, Clock, FileText } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit2, Calendar, Store, Tag, Receipt, CreditCard, Clock, FileText, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import type { Bill } from '@/types';
 
 interface BillDetailViewProps {
   bill: Bill;
   onDelete: () => void;
   onEdit: () => void;
+  onRecover?: () => void;
+  recovering?: boolean;
 }
 
-export function BillDetailView({ bill, onDelete, onEdit }: BillDetailViewProps) {
+export function BillDetailView({ bill, onDelete, onEdit, onRecover, recovering }: BillDetailViewProps) {
   const navigate = useNavigate();
   const days = getDaysRemaining(bill.warranty_expiry);
   const [showPreview, setShowPreview] = useState(false);
@@ -82,6 +85,31 @@ export function BillDetailView({ bill, onDelete, onEdit }: BillDetailViewProps) 
                 <div>
                   <p className="text-sm font-medium text-foreground mb-2">Notes</p>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">{bill.notes}</p>
+                </div>
+              </>
+            )}
+
+            {/* File Recovery Section - when file URL is missing */}
+            {!bill.bill_file_url && onRecover && (
+              <>
+                <Separator />
+                <div className="text-center py-8 border-2 border-dashed border-muted-foreground/20 rounded-lg bg-muted/20">
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-sm font-medium text-foreground mb-1">File Missing</p>
+                  <p className="text-xs text-muted-foreground mb-4 max-w-md mx-auto">
+                    This bill had a file attachment, but the link is broken.
+                    You can try to recover it from storage.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onRecover}
+                    disabled={recovering}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={cn("h-4 w-4", recovering && "animate-spin")} />
+                    {recovering ? 'Recovering...' : 'Try to Recover File'}
+                  </Button>
                 </div>
               </>
             )}

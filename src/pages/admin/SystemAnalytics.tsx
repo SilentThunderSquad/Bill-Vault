@@ -19,7 +19,7 @@ import {
   Download
 } from 'lucide-react';
 import { supabase } from '@/services/supabase';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   ChartContainer,

@@ -182,40 +182,27 @@ export default function Profile() {
 
   // Get the appropriate avatar URL - custom avatar takes priority, then Google photo, then fallback
   const getAvatarUrl = () => {
-    console.log('Profile Avatar Debug:', {
-      avatarUrl,
-      profileAvatarUrl: profile?.avatar_url,
-      userMetadataPicture: user?.user_metadata?.picture,
-      userMetadataAvatar: user?.user_metadata?.avatar_url,
-      imageLoadError
-    });
-
     // Check if we have a custom uploaded avatar and it's a valid URL
     if (avatarUrl && avatarUrl.trim() && avatarUrl.startsWith('http')) {
       // Don't use database-stored Google URLs that might have CORS issues
       if (!avatarUrl.includes('googleusercontent.com')) {
-        console.log('Using custom avatar:', avatarUrl);
         return avatarUrl;
       }
     }
 
     // Check profile data from database for custom avatar (but not Google URLs)
     if (profile?.avatar_url && profile.avatar_url.trim() && profile.avatar_url.startsWith('http') && !profile.avatar_url.includes('googleusercontent.com')) {
-      console.log('Using profile custom avatar:', profile.avatar_url);
       return profile.avatar_url;
     }
 
     // Always use fresh Google profile images from user metadata
     if (user?.user_metadata?.picture) {
-      console.log('Using Google picture from metadata:', user.user_metadata.picture);
       return user.user_metadata.picture;
     }
     if (user?.user_metadata?.avatar_url) {
-      console.log('Using Google avatar_url from metadata:', user.user_metadata.avatar_url);
       return user.user_metadata.avatar_url;
     }
 
-    console.log('No avatar found, using fallback');
     return null;
   };
 
@@ -272,11 +259,9 @@ export default function Profile() {
                             alt="Profile"
                             className="w-full h-full object-cover"
                             onLoad={() => {
-                              console.log('✅ Profile image loaded successfully!', currentAvatarUrl);
                               setImageLoadError(false);
                             }}
                             onError={() => {
-                              console.log('❌ Image failed to load:', currentAvatarUrl, 'Retry count:', retryCount);
                               if (retryCount < 2 && currentAvatarUrl?.includes('googleusercontent.com')) {
                                 // Retry Google images with a slight delay
                                 setTimeout(() => {
@@ -356,11 +341,9 @@ export default function Profile() {
                           alt="Profile"
                           className="w-full h-full object-cover"
                           onLoad={() => {
-                            console.log('✅ Profile image loaded successfully!', currentAvatarUrl);
                             setImageLoadError(false);
                           }}
                           onError={() => {
-                            console.log('❌ Image failed to load:', currentAvatarUrl, 'Retry count:', retryCount);
                             if (retryCount < 2 && currentAvatarUrl?.includes('googleusercontent.com')) {
                               // Retry Google images with a slight delay
                               setTimeout(() => {

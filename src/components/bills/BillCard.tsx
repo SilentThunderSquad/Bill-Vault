@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { WarrantyBadge } from './WarrantyBadge';
 import { FileThumbnail } from './FileThumbnail';
@@ -12,8 +12,14 @@ interface BillCardProps {
   onClick: () => void;
 }
 
-export function BillCard({ bill, onClick }: BillCardProps) {
-  const days = getDaysRemaining(bill.warranty_expiry);
+const BillCard = React.memo(({ bill, onClick }: BillCardProps) => {
+  // Memoize expensive calculations
+  const warrantyInfo = useMemo(() => ({
+    days: getDaysRemaining(bill.warranty_expiry),
+    formattedDate: bill.purchase_date ? formatDate(bill.purchase_date) : null,
+    formattedAmount: bill.total_amount ? formatCurrency(bill.total_amount) : null
+  }), [bill.warranty_expiry, bill.purchase_date, bill.total_amount]);
+
   const [showPreview, setShowPreview] = useState(false);
 
   const handlePreviewClick = () => {
@@ -60,7 +66,7 @@ export function BillCard({ bill, onClick }: BillCardProps) {
                 </div>
                 <div className="cell-content gap-2">
                   <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
-                  <span className="text-truncate">{formatDate(bill.purchase_date)}</span>
+                  <span className="text-truncate">{warrantyInfo.formattedDate}</span>
                 </div>
                 <div className="cell-content gap-2">
                   <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
@@ -86,9 +92,9 @@ export function BillCard({ bill, onClick }: BillCardProps) {
             <span className="text-base sm:text-lg font-bold text-foreground text-truncate">
               {formatCurrency(bill.price)}
             </span>
-            {days >= 0 && (
+            {warrantyInfo.days >= 0 && (
               <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">
-                {days} days left
+                {warrantyInfo.days} days left
               </span>
             )}
           </div>
@@ -104,4 +110,10 @@ export function BillCard({ bill, onClick }: BillCardProps) {
       />
     </>
   );
-}
+});
+
+// Add displayName for better debugging
+BillCard.displayName = 'BillCard';
+
+// Export the memoized component
+export { BillCard };

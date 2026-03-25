@@ -14,12 +14,13 @@ import type { Bill, BillFormData } from '@/types';
 export default function BillDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { fetchBill, updateBill, deleteBill } = useBills();
+  const { fetchBill, updateBill, deleteBill, recoverOrphanedFiles } = useBills();
   const [bill, setBill] = useState<Bill | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [recovering, setRecovering] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -29,6 +30,30 @@ export default function BillDetailPage() {
       .catch(() => toast.error('Bill not found'))
       .finally(() => setLoading(false));
   }, [id, fetchBill]);
+
+  const handleRecover = async () => {
+    if (!bill) return;
+
+    setRecovering(true);
+    try {
+      const recovered = await recoverOrphanedFiles();
+      const thisBillRecovered = recovered.find(r => r.billId === bill.id);
+
+      if (thisBillRecovered) {
+        // Refresh the bill data to show the recovered file
+        const updatedBill = await fetchBill(id!);
+        setBill(updatedBill);
+        toast.success('File recovered successfully!');
+      } else {
+        toast.info('No matching file found in storage for recovery');
+      }
+    } catch (error) {
+      console.error('Recovery error:', error);
+      toast.error('Failed to recover file. Please try again.');
+    } finally {
+      setRecovering(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!id) return;
@@ -102,7 +127,10 @@ export default function BillDetailPage() {
           initialData={{
             product_name: bill.product_name,
             brand: bill.brand || '',
+            vendor_name: bill.vendor_name || '',
+            bill_number: bill.bill_number || '',
             purchase_date: bill.purchase_date,
+            has_warranty: bill.has_warranty,
             warranty_period_months: String(bill.warranty_period_months),
             warranty_expiry: bill.warranty_expiry,
             invoice_number: bill.invoice_number || '',
@@ -122,7 +150,13 @@ export default function BillDetailPage() {
 
   return (
     <>
-      <BillDetailView bill={bill} onDelete={() => setDeleteOpen(true)} onEdit={handleEdit} />
+      <BillDetailView
+        bill={bill}
+        onDelete={() => setDeleteOpen(true)}
+        onEdit={handleEdit}
+        onRecover={handleRecover}
+        recovering={recovering}
+      />
       <DeleteConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}

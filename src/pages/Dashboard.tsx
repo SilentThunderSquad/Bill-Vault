@@ -40,18 +40,6 @@ export default function Dashboard() {
     fetchBills();
   }, [fetchBills]);
 
-  // Debug analytics conditions
-  useEffect(() => {
-    if (!loading && !analyticsLoading) {
-      console.log('Dashboard Analytics Debug:', {
-        billsCount: bills.length,
-        analyticsEnabled,
-        shouldShow: shouldShowAnalytics(bills.length),
-        willRender: analyticsEnabled && shouldShowAnalytics(bills.length)
-      });
-    }
-  }, [bills.length, analyticsEnabled, analyticsLoading, loading]);
-
   const stats: DashboardStats = {
     total: bills.length,
     active: bills.filter((b) => getWarrantyStatus(b.warranty_expiry) === 'active').length,

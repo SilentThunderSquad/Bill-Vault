@@ -2,33 +2,49 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { sanitizeHtml } from '@/utils/security';
+import { deleteStorageFile } from '@/utils/billStorage';
 import { activityTracker, ActivityHelpers } from '@/services/activityTracker';
 import { DEFAULT_CURRENCY } from '@/utils/constants';
 import type { Bill, BillFormData } from '@/types';
 
 const PAGE_SIZE = 20;
 
-/** Extract storage file path from a Supabase public URL */
-function getStoragePath(publicUrl: string, bucket: string): string | null {
-  try {
-    const marker = `/storage/v1/object/public/${bucket}/`;
-    const idx = publicUrl.indexOf(marker);
-    if (idx === -1) return null;
-    // Strip query params (cache busters like ?t=123)
-    const path = publicUrl.substring(idx + marker.length).split('?')[0];
-    return decodeURIComponent(path);
-  } catch {
-    return null;
-  }
-}
+// Optimized field selectors to reduce over-fetching
+const BILL_LIST_FIELDS = `
+  id,
+  product_name,
+  brand,
+  store_name,
+  category,
+  price,
+  currency,
+  purchase_date,
+  warranty_expiry,
+  has_warranty,
+  bill_file_url,
+  created_at
+`;
 
-/** Delete a file from Supabase storage (best-effort, won't throw) */
-async function deleteStorageFile(bucket: string, publicUrl: string | null | undefined) {
-  if (!publicUrl) return;
-  const path = getStoragePath(publicUrl, bucket);
-  if (!path) return;
-  await supabase.storage.from(bucket).remove([path]);
-}
+const BILL_DETAIL_FIELDS = `
+  id,
+  product_name,
+  brand,
+  vendor_name,
+  store_name,
+  category,
+  bill_number,
+  invoice_number,
+  price,
+  currency,
+  purchase_date,
+  warranty_expiry,
+  warranty_period_months,
+  has_warranty,
+  bill_file_url,
+  notes,
+  created_at,
+  updated_at
+`;
 
 export function useBills() {
   const { user } = useAuth();
@@ -49,7 +65,7 @@ export function useBills() {
 
     const { data, error: fetchError, count } = await supabase
       .from('bills')
-      .select('*', { count: 'exact' })
+      .select(BILL_LIST_FIELDS, { count: 'exact' })
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -79,7 +95,7 @@ export function useBills() {
     if (!user) throw new Error('Not authenticated');
     const { data, error: fetchError } = await supabase
       .from('bills')
-      .select('*')
+      .select(BILL_DETAIL_FIELDS)
       .eq('id', id)
       .eq('user_id', user.id)
       .single();
@@ -88,7 +104,7 @@ export function useBills() {
     return data as Bill;
   }, [user]);
 
-  const createBill = async (formData: BillFormData, file?: File) => {
+  const createBill = useCallback(async (formData: BillFormData, file?: File) => {
     if (!user) throw new Error('Not authenticated');
 
     // Refresh session to ensure valid JWT for RLS
@@ -167,9 +183,9 @@ export function useBills() {
     // Add to local state
     setBills((prev) => [data as Bill, ...prev]);
     return data as Bill;
-  };
+  }, [user]);
 
-  const updateBill = async (id: string, formData: Partial<BillFormData>, newFile?: File) => {
+  const updateBill = useCallback(async (id: string, formData: Partial<BillFormData>, newFile?: File) => {
     if (!user) throw new Error('Not authenticated');
 
     const update: Record<string, unknown> = {};
@@ -257,9 +273,9 @@ export function useBills() {
     // Update local state
     setBills((prev) => prev.map((b) => (b.id === id ? (data as Bill) : b)));
     return data as Bill;
-  };
+  }, [user]);
 
-  const deleteBill = async (billId: string) => {
+  const deleteBill = useCallback(async (billId: string) => {
     if (!user) throw new Error('Not authenticated');
 
     // Fetch the bill first to get the file URL and product name for cleanup and logging
@@ -292,7 +308,88 @@ export function useBills() {
     await deleteStorageFile('bill-images', bill?.bill_file_url);
 
     setBills((prev) => prev.filter((b) => b.id !== billId));
-  };
+  }, [user]);
+
+  const recoverOrphanedFiles = useCallback(async () => {
+    if (!user) throw new Error('Not authenticated');
+
+    // 1. Get all bills without file URLs
+    const { data: billsWithoutFiles, error: billsError } = await supabase
+      .from('bills')
+      .select('id, product_name, created_at')
+      .eq('user_id', user.id)
+      .is('bill_file_url', null);
+
+    if (billsError) {
+      console.error('Failed to fetch bills without files:', billsError);
+      return [];
+    }
+
+    if (!billsWithoutFiles || billsWithoutFiles.length === 0) {
+      return [];
+    }
+
+    // 2. List all files in storage for this user
+    const { data: files, error: filesError } = await supabase.storage
+      .from('bill-images')
+      .list(user.id, {
+        limit: 1000,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+    if (filesError) {
+      console.error('Failed to list storage files:', filesError);
+      return [];
+    }
+
+    if (!files || files.length === 0) {
+      return [];
+    }
+
+    // 3. Try to match files to bills based on creation time proximity
+    const recovered = [];
+
+    for (const bill of billsWithoutFiles) {
+      const billCreatedAt = new Date(bill.created_at);
+
+      // Find files created around the same time (within 1 hour)
+      const matchingFiles = files.filter(file => {
+        if (!file.created_at) return false;
+        const fileCreatedAt = new Date(file.created_at);
+        const timeDiff = Math.abs(fileCreatedAt.getTime() - billCreatedAt.getTime());
+        return timeDiff <= 60 * 60 * 1000; // 1 hour
+      });
+
+      if (matchingFiles.length > 0) {
+        // Use the first matching file (or the one with closest creation time)
+        const matchingFile = matchingFiles[0];
+        const filePath = `${user.id}/${matchingFile.name}`;
+
+        const { data: urlData } = supabase.storage
+          .from('bill-images')
+          .getPublicUrl(filePath);
+
+        // Update the bill with the file URL
+        const { error: updateError } = await supabase
+          .from('bills')
+          .update({ bill_file_url: urlData.publicUrl })
+          .eq('id', bill.id)
+          .eq('user_id', user.id);
+
+        if (updateError) {
+          console.error(`Failed to update bill ${bill.id}:`, updateError);
+        } else {
+          recovered.push({
+            billId: bill.id,
+            productName: bill.product_name,
+            fileUrl: urlData.publicUrl
+          });
+        }
+      }
+    }
+
+    return recovered;
+  }, [user]);
 
   return {
     bills,
@@ -305,5 +402,6 @@ export function useBills() {
     updateBill,
     deleteBill,
     loadMore,
+    recoverOrphanedFiles, // Add the recovery function
   };
 }

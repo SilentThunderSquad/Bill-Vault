@@ -1,3 +1,4 @@
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ import { motion } from 'framer-motion';
 import { formatRelativeDate } from '@/utils/formatters';
 import { cn } from '@/lib/utils';
 import { useWarrantyNotifications } from '@/hooks/useWarrantyNotifications';
-import { useState } from 'react';
 import { toast } from 'sonner';
 import type { Bill } from '@/types';
 
@@ -65,7 +65,7 @@ function getUrgencyConfig(urgency: string) {
   }
 }
 
-function WarrantyAlertItem({ alert }: { alert: WarrantyAlert }) {
+const WarrantyAlertItem = React.memo(({ alert }: { alert: WarrantyAlert }) => {
   const config = getUrgencyConfig(alert.urgency);
 
   return (
@@ -110,16 +110,19 @@ function WarrantyAlertItem({ alert }: { alert: WarrantyAlert }) {
       </div>
     </Link>
   );
-}
+});
 
-function SummaryStatsGrid({ summary }: {
+// Add displayName for better debugging
+WarrantyAlertItem.displayName = 'WarrantyAlertItem';
+
+const SummaryStatsGrid = React.memo(({ summary }: {
   summary: {
     expiredCount: number;
     criticalCount: number;
     warningCount: number;
     upcomingCount: number;
   }
-}) {
+}) => {
   const stats = [
     {
       label: 'Expired',
@@ -164,9 +167,12 @@ function SummaryStatsGrid({ summary }: {
       ))}
     </div>
   );
-}
+});
 
-export function EnhancedWarrantyAlertPanel({ bills: _bills }: { bills: Bill[] }) {
+// Add displayName for better debugging
+SummaryStatsGrid.displayName = 'SummaryStatsGrid';
+
+const EnhancedWarrantyAlertPanel = React.memo(({ bills: _bills }: { bills: Bill[] }) => {
   const {
     alerts,
     summary,
@@ -182,9 +188,20 @@ export function EnhancedWarrantyAlertPanel({ bills: _bills }: { bills: Bill[] })
   const [processingNotifications, setProcessingNotifications] = useState(false);
   const [requestingPermission, setRequestingPermission] = useState(false);
 
-  const totalAlerts = summary.expiredCount + summary.criticalCount + summary.warningCount + summary.upcomingCount;
-  const criticalAlerts = alerts.filter(alert => ['critical', 'high'].includes(alert.urgencyLevel));
-  const hasUrgentAlerts = summary.expiredCount > 0 || summary.criticalCount > 0;
+  // Memoize expensive calculations
+  const alertMetrics = useMemo(() => {
+    const totalAlerts = summary.expiredCount + summary.criticalCount + summary.warningCount + summary.upcomingCount;
+    const criticalAlerts = alerts.filter(alert => ['critical', 'high'].includes(alert.urgencyLevel));
+    const hasUrgentAlerts = summary.expiredCount > 0 || summary.criticalCount > 0;
+
+    return {
+      totalAlerts,
+      criticalAlerts,
+      hasUrgentAlerts
+    };
+  }, [alerts, summary.expiredCount, summary.criticalCount, summary.warningCount, summary.upcomingCount]);
+
+  const { totalAlerts, criticalAlerts, hasUrgentAlerts } = alertMetrics;
 
   const handleProcessNotifications = async () => {
     setProcessingNotifications(true);
@@ -420,4 +437,10 @@ export function EnhancedWarrantyAlertPanel({ bills: _bills }: { bills: Bill[] })
       </Card>
     </motion.div>
   );
-}
+});
+
+// Add displayName for better debugging
+EnhancedWarrantyAlertPanel.displayName = 'EnhancedWarrantyAlertPanel';
+
+// Export the memoized component
+export { EnhancedWarrantyAlertPanel };

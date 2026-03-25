@@ -16,7 +16,7 @@ import {
   ArrowDownIcon
 } from 'lucide-react';
 import { supabase } from '@/services/supabase';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface SystemMetrics {
   totalUsers: number;
@@ -173,6 +173,76 @@ function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Optimized batch function to fix N+1 query problem
+  const batchEnhanceLogs = async (logs: any[]) => {
+    if (!logs.length) return [];
+
+    // Extract unique user IDs
+    const adminIds = new Set<string>();
+    const resourceIds = new Set<string>();
+
+    logs.forEach(log => {
+      if (log.admin_id) adminIds.add(log.admin_id);
+      if (log.resource_type === 'user' && log.resource_id) resourceIds.add(log.resource_id);
+    });
+
+    // Batch fetch admin users
+    const adminUsersMap = new Map();
+    if (adminIds.size > 0) {
+      const { data: adminUsers } = await supabase
+        .from('admin_user_overview')
+        .select('id, email, full_name')
+        .in('id', Array.from(adminIds));
+
+      adminUsers?.forEach(user => {
+        adminUsersMap.set(user.id, user);
+      });
+    }
+
+    // Batch fetch resource users
+    const resourceUsersMap = new Map();
+    if (resourceIds.size > 0) {
+      const { data: resourceUsers } = await supabase
+        .from('admin_user_overview')
+        .select('id, email, full_name')
+        .in('id', Array.from(resourceIds));
+
+      resourceUsers?.forEach(user => {
+        resourceUsersMap.set(user.id, user);
+      });
+    }
+
+    // Map user data to logs
+    return logs.map(log => {
+      let user_email = null;
+      let user_full_name = null;
+
+      if (log.admin_id) {
+        const adminUser = adminUsersMap.get(log.admin_id);
+        if (adminUser) {
+          user_email = adminUser.email;
+          user_full_name = adminUser.full_name;
+        }
+      }
+
+      // If action is on a user resource, get that user's info instead
+      if (log.resource_type === 'user' && log.resource_id) {
+        const resourceUser = resourceUsersMap.get(log.resource_id);
+        if (resourceUser) {
+          user_email = resourceUser.email;
+          user_full_name = resourceUser.full_name;
+        }
+      }
+
+      return {
+        ...log,
+        user_id: log.resource_type === 'user' ? log.resource_id : log.admin_id,
+        user_email,
+        user_full_name,
+      };
+    });
+  };
+
   useEffect(() => {
     loadSystemMetrics();
     loadRecentActivities();
@@ -191,8 +261,6 @@ function AdminDashboard() {
 
       // If admin_system_overview doesn't exist, try to calculate from other tables
       if (overviewError && overviewError.code === '42P01') {
-        console.log('admin_system_overview table not found, calculating metrics from individual tables');
-
         // Calculate metrics from individual admin views
         const [
           { data: users, error: usersError },
@@ -295,48 +363,8 @@ function AdminDashboard() {
           throw basicError;
         }
 
-        // Enhance logs with user information
-        const enhancedLogs = await Promise.all(
-          (basicLogs || []).map(async (log) => {
-            let user_email = null;
-            let user_full_name = null;
-
-            // Get admin user info
-            if (log.admin_id) {
-              const { data: adminUser } = await supabase
-                .from('admin_user_overview')
-                .select('email, full_name')
-                .eq('id', log.admin_id)
-                .single();
-
-              if (adminUser) {
-                user_email = adminUser.email;
-                user_full_name = adminUser.full_name;
-              }
-            }
-
-            // If action is on a user resource, get that user's info instead
-            if (log.resource_type === 'user' && log.resource_id) {
-              const { data: resourceUser } = await supabase
-                .from('admin_user_overview')
-                .select('email, full_name')
-                .eq('id', log.resource_id)
-                .single();
-
-              if (resourceUser) {
-                user_email = resourceUser.email;
-                user_full_name = resourceUser.full_name;
-              }
-            }
-
-            return {
-              ...log,
-              user_id: log.resource_type === 'user' ? log.resource_id : log.admin_id,
-              user_email,
-              user_full_name
-            };
-          })
-        );
+        // Enhance logs with user information using batched queries (fixes N+1 problem)
+        const enhancedLogs = await batchEnhanceLogs(basicLogs || []);
 
         // Format activities for display
         const formattedActivities = enhancedLogs.map((activity, index) => ({

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { queryCache, cacheKeys } from '@/services/queryCache';
 import type { UserProfile } from '@/types';
 
 export function useProfile() {
@@ -14,38 +15,48 @@ export function useProfile() {
     setLoading(true);
     setError(null);
 
-    const { data, error: fetchError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+    try {
+      // Use query cache with 10-minute TTL for user profile
+      const data = await queryCache.get(
+        cacheKeys.userProfile(user.id),
+        async () => {
+          const { data, error: fetchError } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
 
-    if (fetchError && fetchError.code === 'PGRST116') {
-      // Profile doesn't exist, create one
-      const { data: newProfile, error: insertError } = await supabase
-        .from('user_profiles')
-        .insert({
-          user_id: user.id,
-          full_name: user.user_metadata?.full_name || '',
-        })
-        .select()
-        .single();
+          if (fetchError && fetchError.code === 'PGRST116') {
+            // Profile doesn't exist, create one
+            const { data: newProfile, error: insertError } = await supabase
+              .from('user_profiles')
+              .insert({
+                user_id: user.id,
+                full_name: user.user_metadata?.full_name || '',
+              })
+              .select()
+              .single();
 
-      if (insertError) {
-        setError('Failed to create profile');
-      } else {
-        setProfile(newProfile);
-      }
-    } else if (fetchError) {
-      setError(fetchError.message);
-    } else {
+            if (insertError) throw insertError;
+            return newProfile;
+          } else if (fetchError) {
+            throw fetchError;
+          }
+
+          return data;
+        },
+        10 * 60 * 1000 // 10 minutes TTL
+      );
+
       setProfile(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch profile');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }, [user]);
 
-  const updateProfile = async (updates: Partial<Omit<UserProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+  const updateProfile = useCallback(async (updates: Partial<Omit<UserProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
     if (!user) throw new Error('Not authenticated');
 
     const { data, error: updateError } = await supabase
@@ -56,9 +67,12 @@ export function useProfile() {
       .single();
 
     if (updateError) throw updateError;
+
+    // Invalidate cache and update local state
+    queryCache.invalidate(cacheKeys.userProfile(user.id));
     setProfile(data);
     return data;
-  };
+  }, [user]);
 
   const uploadAvatar = async (file: File): Promise<string> => {
     if (!user) throw new Error('Not authenticated');

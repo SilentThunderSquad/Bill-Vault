@@ -40,8 +40,58 @@ export function FileUpload({ onFileSelect, mode, acceptedTypes = 'both' }: FileU
     }
   };
 
+  // Enhanced file security validation
+  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+    // Check file type
+    if (!isFileTypeAllowed(file)) {
+      return { isValid: false, error: 'Invalid file type. Only images and PDFs are allowed.' };
+    }
+
+    // Check file size (10MB limit for security)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      return { isValid: false, error: 'File size too large. Maximum size is 10MB.' };
+    }
+
+    // Check for minimum file size (prevent empty files)
+    if (file.size < 100) {
+      return { isValid: false, error: 'File too small. Minimum size is 100 bytes.' };
+    }
+
+    // Additional security: Check file extension matches MIME type
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    const validImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+    const validPdfExtensions = ['pdf'];
+
+    if (file.type.startsWith('image/') && !validImageExtensions.includes(extension)) {
+      return { isValid: false, error: 'Image file extension does not match file type.' };
+    }
+
+    if (file.type === 'application/pdf' && !validPdfExtensions.includes(extension)) {
+      return { isValid: false, error: 'PDF file extension does not match file type.' };
+    }
+
+    // Check for malicious file names
+    const suspiciousPatterns = [
+      /\.(exe|bat|cmd|com|pif|scr|vbs|js|jar|zip|rar)$/i,
+      /[<>"|*?]/,
+      /../, // Path traversal
+    ];
+
+    if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
+      return { isValid: false, error: 'Invalid file name contains suspicious patterns.' };
+    }
+
+    return { isValid: true };
+  };
+
   const handleFile = useCallback((file: File) => {
-    if (!isFileTypeAllowed(file)) return;
+    const validation = validateFile(file);
+
+    if (!validation.isValid) {
+      alert(validation.error || 'File validation failed');
+      return;
+    }
 
     setFileName(file.name);
 

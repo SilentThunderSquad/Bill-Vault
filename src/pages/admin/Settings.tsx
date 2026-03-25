@@ -19,7 +19,7 @@ import {
   Copy,
   RotateCcw
 } from 'lucide-react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface SystemSettings {

@@ -51,30 +51,19 @@ export function Header({ onMenuClick: _onMenuClick }: HeaderProps) {
 
   // Get avatar URL with Google profile fallback
   const getAvatarUrl = () => {
-    console.log('Header Avatar Debug:', {
-      profileAvatarUrl: profile?.avatar_url,
-      userMetadataPicture: user?.user_metadata?.picture,
-      userMetadataAvatar: user?.user_metadata?.avatar_url,
-      headerImageError
-    });
-
     // Check if we have a custom uploaded avatar (but not Google URLs which might have CORS issues)
     if (profile?.avatar_url && profile.avatar_url.trim() && profile.avatar_url.startsWith('http') && !profile.avatar_url.includes('googleusercontent.com')) {
-      console.log('Header using custom profile avatar:', profile.avatar_url);
       return profile.avatar_url;
     }
 
     // Always use fresh Google profile images from user metadata
     if (user?.user_metadata?.picture) {
-      console.log('Header using Google picture:', user.user_metadata.picture);
       return user.user_metadata.picture;
     }
     if (user?.user_metadata?.avatar_url) {
-      console.log('Header using Google avatar_url:', user.user_metadata.avatar_url);
       return user.user_metadata.avatar_url;
     }
 
-    console.log('Header: No avatar found, using fallback');
     return null;
   };
 
