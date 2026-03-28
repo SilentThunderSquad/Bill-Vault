@@ -70,10 +70,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/, /^\/(auth|callback)/, /\.(js|css|png|jpg|svg|ico)$/],
-        // Skip waiting and claim clients immediately for faster updates
         skipWaiting: true,
         clientsClaim: true,
-        // Import warranty notification handler into main service worker
         importScripts: ['/sw-warranty-handler.js'],
         runtimeCaching: [
           {
@@ -117,13 +115,12 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               },
               cacheableResponse: {
-                statuses: [200] // Only cache successful responses, not opaque
+                statuses: [200]
               }
             }
           },
           {
             // Supabase API - network first with fallback
-            // IMPORTANT: Only cache 200 responses to avoid caching auth errors
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: 'NetworkFirst',
             options: {
@@ -131,10 +128,10 @@ export default defineConfig({
               networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 // 1 hour (short for API data)
+                maxAgeSeconds: 60 * 60 // 1 hour
               },
               cacheableResponse: {
-                statuses: [200] // Only cache successful responses
+                statuses: [200]
               }
             }
           },
@@ -147,7 +144,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true
       },
       devOptions: {
-        enabled: true, // Enable PWA in development for warranty notification testing
+        enabled: true,
         type: 'module',
         navigateFallback: '/index.html'
       }
@@ -168,64 +165,23 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-<<<<<<< HEAD
         manualChunks: (id) => {
-          // Early return for React core to prevent circular dependencies
-          if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler/')) {
-            return 'react-core';
-          }
-          
-          // Separate each major library into its own chunk
-          if (id.includes('tesseract.js')) {
-            return 'tesseract';
-          }
-          if (id.includes('pdfjs-dist')) {
-            return 'pdfjs';
-          }
-          if (id.includes('recharts')) {
-            return 'recharts';
-          }
-          if (id.includes('framer-motion')) {
-            return 'framer-motion';
-          }
-          
-          // Other specific libraries
-          if (id.includes('node_modules')) {
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('@base-ui')) {
-              return 'base-ui';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            if (id.includes('react-router-dom') || id.includes('react-router')) {
-              return 'router';
-            }
-            if (id.includes('date-fns')) {
-              return 'date-utils';
-            }
-            // All other node_modules go to vendor
-            return 'vendor';
-          }
-=======
-        manualChunks: {
-          'tesseract': ['tesseract.js'],
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui': ['framer-motion', 'lucide-react'],
-          'supabase': ['@supabase/supabase-js'],
-          'base-ui': ['@base-ui/react'],
->>>>>>> parent of 397e578 (Build & performance optimizations, lazy charts)
+          if (!id.includes('node_modules')) return;
+
+          // Heavy libraries that are lazy-loaded or rarely used — separate chunks for caching
+          if (id.includes('tesseract.js')) return 'tesseract';
+          if (id.includes('pdfjs-dist')) return 'pdfjs';
+          if (id.includes('recharts')) return 'recharts';
+          if (id.includes('framer-motion')) return 'framer-motion';
+          if (id.includes('@supabase')) return 'supabase';
+          if (id.includes('date-fns')) return 'date-utils';
+
+          // All other node_modules into one vendor chunk (avoids circular deps)
+          return 'vendor';
         },
       },
     },
-<<<<<<< HEAD
-    // Single chunk size warning limit
-    chunkSizeWarningLimit: 600,
-    // Disable source maps for smaller builds
+    chunkSizeWarningLimit: 800,
     sourcemap: false,
-=======
->>>>>>> parent of 397e578 (Build & performance optimizations, lazy charts)
   },
 })

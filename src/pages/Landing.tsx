@@ -22,12 +22,14 @@ export default function Landing() {
       />
       <div className="min-h-screen bg-background">
         <Navbar />
-        <HeroSection />
-        <ProblemSection />
-        <SolutionSection />
-        <HowItWorksSection />
-        <FeaturesSection />
-        <CTASection />
+        <main>
+          <HeroSection />
+          <ProblemSection />
+          <SolutionSection />
+          <HowItWorksSection />
+          <FeaturesSection />
+          <CTASection />
+        </main>
         <Footer />
       </div>
     </>

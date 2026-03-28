@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -19,7 +19,7 @@
     <title>Bill Vault - Never Lose a Warranty Again | Track Bills & Warranties</title>
     <meta name="title" content="Bill Vault - Never Lose a Warranty Again | Track Bills & Warranties" />
     <meta name="description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning. Never miss a warranty claim again." />
-    <meta name="keywords" content="warranty tracker, bill storage, invoice manager, warranty expiry alert, OCR bill scanner, product warranty, bill vault, warranty management" />
+    <meta name="keywords" content="warranty tracker, bill storage, invoice manager, warranty expiry alert, OCR bill scanner, product warranty, bill vault, warranty management, receipt organizer, digital bill storage" />
     <meta name="author" content="Bill Vault" />
     <meta name="robots" content="index, follow" />
 
@@ -28,7 +28,7 @@
     <meta property="og:url" content="https://billvault.silentthundersquad.in/" />
     <meta property="og:title" content="Bill Vault - Never Lose a Warranty Again" />
     <meta property="og:description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning." />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image" content="https://billvault.silentthundersquad.in/og-image.png" />
     <meta property="og:site_name" content="Bill Vault" />
 
     <!-- Twitter -->
@@ -36,7 +36,7 @@
     <meta property="twitter:url" content="https://billvault.silentthundersquad.in/" />
     <meta property="twitter:title" content="Bill Vault - Never Lose a Warranty Again" />
     <meta property="twitter:description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning." />
-    <meta property="twitter:image" content="/og-image.png" />
+    <meta property="twitter:image" content="https://billvault.silentthundersquad.in/og-image.png" />
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#1E1B4B" />
@@ -45,34 +45,19 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://billvault.silentthundersquad.in/" />
 
-    <!-- Fonts -->
+    <!-- Fonts - Async loading with only used weights for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<<<<<<< HEAD
-    <!-- Load fonts asynchronously for better performance -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" /></noscript>
 
-=======
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" /></noscript>
-
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/src/main.tsx" as="script" />
-    <link rel="preload" href="/og-image.png" as="image" />
-
-<<<<<<< HEAD
->>>>>>> parent of 397e578 (Build & performance optimizations, lazy charts)
-    <!-- Structured Data - Enhanced WebApplication & Organization -->
-=======
-    <!-- Structured Data -->
->>>>>>> parent of 0391ccc (Enhance SEO, add FAQ schema & update sitemap)
+    <!-- Structured Data - WebApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Bill Vault",
-      "description": "Store bills securely, track product warranties, and get alerts before they expire.",
+      "description": "Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker and bill management app.",
       "url": "https://billvault.silentthundersquad.in",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web",
@@ -82,11 +67,58 @@
         "priceCurrency": "USD"
       },
       "featureList": [
-        "Bill storage",
-        "Warranty tracking",
-        "Expiry alerts",
-        "OCR scanning",
-        "Cloud sync"
+        "Bill storage with cloud sync",
+        "OCR bill scanning",
+        "Warranty tracking & expiry alerts",
+        "Smart notifications",
+        "Secure document storage"
+      ],
+      "author": {
+        "@type": "Organization",
+        "name": "Bill Vault",
+        "url": "https://billvault.silentthundersquad.in"
+      }
+    }
+    </script>
+
+    <!-- Structured Data - FAQ for rich snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Bill Vault?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bill Vault is a free warranty tracker and bill management app that lets you store receipts securely, track product warranty expiry dates, and receive smart alerts before warranties expire."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does Bill Vault track warranties?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Upload your bill or receipt and Bill Vault automatically extracts purchase details using OCR technology. It calculates warranty expiry dates and sends you alerts at 30 days, 7 days, and 1 day before expiry."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Bill Vault free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Bill Vault is completely free. Store unlimited bills, track warranties, and receive expiry alerts at no cost."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data secure on Bill Vault?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Bill Vault uses secure cloud storage with encrypted connections. Your bills and personal data are protected with industry-standard security measures."
+          }
+        }
       ]
     }
     </script>
