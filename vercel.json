@@ -15,7 +15,7 @@
   ],
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/assets/:path*",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "source": "/favicon.(ico|svg|png)",
+      "source": "/:file(favicon).:ext(ico|svg|png)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
@@ -44,20 +44,20 @@
       ]
     },
     {
-      "source": "/(.*\\.(jpg|jpeg|png|gif|webp|svg|ico))",
+      "source": "/:path*.:ext(jpg|jpeg|png|gif|webp|svg|ico)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/(.*\\.(woff|woff2|ttf|eot))",
+      "source": "/:path*.:ext(woff|woff2|ttf|eot)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
         { "key": "Access-Control-Allow-Origin", "value": "*" }
       ]
     },
     {
-      "source": "/(sitemap\\.xml|robots\\.txt)",
+      "source": "/:file(sitemap|robots).:ext(xml|txt)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
