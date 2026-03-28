@@ -75,12 +75,7 @@ export const organizationSchema: OrganizationSchema = {
   '@type': 'Organization',
   name: 'Bill Vault',
   url: 'https://billvault.silentthundersquad.in',
-  logo: 'https://billvault.silentthundersquad.in/icons/icon-512x512.png',
   description: 'Digital bill storage and warranty tracking platform that helps users manage their receipts, track warranties, and never miss important expiry dates.',
-  sameAs: [
-    'https://github.com/SilentThunderSquad/Bill-Vault',
-    'https://silentthundersquad.in'
-  ],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer service',
@@ -92,23 +87,19 @@ export const webApplicationSchema: WebApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
   name: 'Bill Vault',
-  description: 'Free warranty tracker and digital receipt storage app with OCR scanning. Track product warranties, scan bills automatically, and get expiry alerts. Never miss a warranty claim again.',
+  description: 'Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning.',
   url: 'https://billvault.silentthundersquad.in',
   applicationCategory: 'FinanceApplication',
   operatingSystem: 'Web',
   featureList: [
     'Digital bill storage with cloud sync',
-    'OCR bill scanning and automatic data extraction',
-    'Warranty tracking and expiry monitoring',
-    'Smart notification system for warranty expiry',
+    'OCR bill scanning and data extraction',
+    'Warranty tracking and expiry alerts',
+    'Smart notification system',
     'Secure encrypted document storage',
     'Mobile responsive interface',
-    'Dark and light theme support',
-    'Advanced search and filter capabilities',
-    'Progressive Web App with offline support',
-    'Multi-device synchronization',
-    'Category-based bill organization',
-    'Export and download capabilities'
+    'Dark/light theme support',
+    'Search and filter capabilities'
   ],
   offers: {
     '@type': 'Offer',
@@ -117,7 +108,7 @@ export const webApplicationSchema: WebApplicationSchema = {
   },
   author: {
     '@type': 'Organization',
-    name: 'Silent Thunder Squad',
+    name: 'Bill Vault',
     url: 'https://billvault.silentthundersquad.in'
   }
 };
