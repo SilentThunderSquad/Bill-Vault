@@ -73,6 +73,8 @@ export default defineConfig({
         // Skip waiting and claim clients immediately for faster updates
         skipWaiting: true,
         clientsClaim: true,
+        // Import warranty notification handler into main service worker
+        importScripts: ['/sw-warranty-handler.js'],
         runtimeCaching: [
           {
             // Google Fonts stylesheets
@@ -145,7 +147,9 @@ export default defineConfig({
         cleanupOutdatedCaches: true
       },
       devOptions: {
-        enabled: false // Disable PWA in development to avoid dev-dist dependency
+        enabled: true, // Enable PWA in development for warranty notification testing
+        type: 'module',
+        navigateFallback: '/index.html'
       }
     })
   ],

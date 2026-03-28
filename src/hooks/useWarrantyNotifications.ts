@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { WarrantyNotificationService } from '@/services/warrantyNotificationService';
 import { pwaNotificationService, PWANotificationService } from '@/services/pwaNotificationService';
+import { WarrantyTestingUtils } from '@/utils/warrantyTestingUtils';
 import type { WarrantyAlert } from '@/services/warrantyNotificationService';
 
 interface UseWarrantyNotificationsReturn {
@@ -22,6 +23,9 @@ interface UseWarrantyNotificationsReturn {
   requestPushPermission: () => Promise<NotificationPermission>;
   sendTestNotification: () => Promise<void>;
   canUsePushNotifications: boolean;
+  // Development-only methods
+  systemHealth?: () => Promise<any>;
+  debugMode?: boolean;
 }
 
 export function useWarrantyNotifications(): UseWarrantyNotificationsReturn {
@@ -80,17 +84,22 @@ export function useWarrantyNotifications(): UseWarrantyNotificationsReturn {
     notificationsCreated: number;
   }> => {
     if (!user) {
-      return { alertsProcessed: 0, notificationsCreated: 0 };
+      throw new Error('User not authenticated');
     }
+
+    console.log('Processing warranty notifications for user:', user.id);
 
     try {
       const result = await WarrantyNotificationService.processWarrantyAlerts(user.id);
+      console.log('WarrantyNotificationService result:', result);
 
       // Send PWA notifications for critical alerts if permission granted
       if (canUsePushNotifications) {
         const criticalAlerts = alerts.filter(alert =>
           alert.urgencyLevel === 'critical' && alert.daysUntilExpiry <= 1
         );
+
+        console.log('Sending PWA notifications for critical alerts:', criticalAlerts.length);
 
         for (const alert of criticalAlerts) {
           const payload = PWANotificationService.createWarrantyNotificationPayload(
@@ -100,16 +109,32 @@ export function useWarrantyNotifications(): UseWarrantyNotificationsReturn {
             alert.alertType
           );
 
-          await pwaNotificationService.showNotification(payload);
+          try {
+            await pwaNotificationService.showNotification(payload);
+          } catch (notificationError) {
+            console.warn('Failed to send PWA notification:', notificationError);
+            // Continue processing other notifications
+          }
         }
+      }
+
+      // Refresh warranty data after processing notifications
+      console.log('Refreshing warranty data...');
+      try {
+        await checkWarranties();
+        console.log('Warranty data refreshed successfully');
+      } catch (refreshError) {
+        console.warn('Failed to refresh warranty data:', refreshError);
+        // Don't throw here, the main processing was successful
       }
 
       return result;
     } catch (err) {
       console.error('Error processing notifications:', err);
-      return { alertsProcessed: 0, notificationsCreated: 0 };
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process notifications';
+      throw new Error(errorMessage);
     }
-  }, [user, alerts, canUsePushNotifications]);
+  }, [user, alerts, canUsePushNotifications, checkWarranties]);
 
   const requestPushPermission = useCallback(async (): Promise<NotificationPermission> => {
     try {
@@ -145,6 +170,20 @@ export function useWarrantyNotifications(): UseWarrantyNotificationsReturn {
     return () => clearInterval(interval);
   }, [checkWarranties]);
 
+  // Development-only methods
+  const systemHealth = useCallback(async () => {
+    if (!import.meta.env.DEV) return null;
+    return await WarrantyTestingUtils.getSystemStatus();
+  }, []);
+
+  // Enhanced error handling with development logging
+  useEffect(() => {
+    if (import.meta.env.DEV && error) {
+      console.error('[useWarrantyNotifications] Error detected:', error);
+      WarrantyTestingUtils.logSystemDiagnostics();
+    }
+  }, [error]);
+
   return {
     alerts,
     summary,
@@ -154,6 +193,11 @@ export function useWarrantyNotifications(): UseWarrantyNotificationsReturn {
     processNotifications,
     requestPushPermission,
     sendTestNotification,
-    canUsePushNotifications
+    canUsePushNotifications,
+    // Development-only exports
+    ...(import.meta.env.DEV && {
+      systemHealth,
+      debugMode: true
+    })
   };
 }

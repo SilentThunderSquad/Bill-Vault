@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useBills } from '@/hooks/useBills';
 import { useProfile } from '@/hooks/useProfile';
@@ -8,12 +8,15 @@ import { RecentBills } from '@/components/dashboard/RecentBills';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { WarrantyTimeline } from '@/components/dashboard/WarrantyTimeline';
 import { ModernWarrantyAlertPanel } from '@/components/dashboard/ModernWarrantyAlertPanel';
+import { WarrantyDevTestingPanel } from '@/components/development/WarrantyDevTestingPanel';
 import { MonthlyUploadsChart } from '@/components/dashboard/MonthlyUploadsChart';
 import { CategoryDistributionChart } from '@/components/dashboard/CategoryDistributionChart';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { Button } from '@/components/ui/button';
 import { getWarrantyStatus } from '@/utils/formatters';
 import { shouldShowAnalytics } from '@/utils/chartHelpers';
 import { motion } from 'framer-motion';
+import { FlaskConical, X } from 'lucide-react';
 import type { DashboardStats } from '@/types';
 
 const containerVariants = {
@@ -35,6 +38,7 @@ export default function Dashboard() {
   const { bills, loading, fetchBills } = useBills();
   const { profile } = useProfile();
   const { analyticsEnabled, loading: analyticsLoading } = useAnalyticsSettings();
+  const [showDevPanel, setShowDevPanel] = useState(false);
 
   useEffect(() => {
     fetchBills();
@@ -84,6 +88,27 @@ export default function Dashboard() {
       <motion.div variants={itemVariants}>
         <ModernWarrantyAlertPanel />
       </motion.div>
+
+      {/* Development Testing Panel - Only in development mode */}
+      {import.meta.env.DEV && (
+        <motion.div variants={itemVariants}>
+          {!showDevPanel ? (
+            <div className="flex justify-center">
+              <Button
+                onClick={() => setShowDevPanel(true)}
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all duration-200"
+              >
+                <FlaskConical className="h-4 w-4 mr-2" />
+                Show Dev Testing Panel
+              </Button>
+            </div>
+          ) : (
+            <WarrantyDevTestingPanel onClose={() => setShowDevPanel(false)} />
+          )}
+        </motion.div>
+      )}
 
       <motion.div variants={itemVariants}>
         <StatsGrid stats={stats} />

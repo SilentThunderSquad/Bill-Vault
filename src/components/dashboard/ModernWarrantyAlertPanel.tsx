@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,16 @@ const ModernWarrantyAlertPanel = React.memo(() => {
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [processingNotifications, setProcessingNotifications] = useState(false);
+  const [lastProcessTime, setLastProcessTime] = useState<number>(0);
+  const [, forceUpdate] = useState({});
+
+  // Emergency reset function
+  const emergencyReset = () => {
+    console.log('Manual emergency reset triggered');
+    setProcessingNotifications(false);
+    setLastProcessTime(0);
+    toast.success('Button state reset successfully');
+  };
 
   // Memoize calculations
   const alertData = useMemo(() => {
@@ -60,16 +70,105 @@ const ModernWarrantyAlertPanel = React.memo(() => {
     };
   }, [alerts, summary]);
 
+  // Helper to determine if button should be disabled due to rate limiting
+  const isOnCooldown = useMemo(() => {
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime;
+    const RATE_LIMIT_MS = 5000; // 5 seconds
+    return timeSinceLastProcess < RATE_LIMIT_MS && lastProcessTime > 0;
+  }, [lastProcessTime]);
+
+  const cooldownTimeLeft = useMemo(() => {
+    if (!isOnCooldown) return 0;
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime;
+    const RATE_LIMIT_MS = 5000;
+    return Math.ceil((RATE_LIMIT_MS - timeSinceLastProcess) / 1000);
+  }, [lastProcessTime, isOnCooldown]);
+
   const { totalAlerts, urgentCount, upcomingCount, criticalAlerts, healthScore, hasUrgentAlerts } = alertData;
 
+  // Emergency reset mechanism if button gets stuck
+  useEffect(() => {
+    if (processingNotifications) {
+      const emergencyReset = setTimeout(() => {
+        console.warn('Emergency reset: Processing notifications took too long');
+        setProcessingNotifications(false);
+        toast.error('Processing timed out, please try again');
+      }, 45000); // 45 seconds emergency timeout
+
+      return () => clearTimeout(emergencyReset);
+    }
+  }, [processingNotifications]);
+
+  // Force re-render every second during cooldown to update countdown
+  useEffect(() => {
+    if (!isOnCooldown) return;
+
+    const interval = setInterval(() => {
+      forceUpdate({});
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isOnCooldown]);
+
   const handleProcessNotifications = async () => {
+    // Prevent rapid-fire clicking (rate limit: 5 seconds)
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime;
+    const RATE_LIMIT_MS = 5000; // 5 seconds
+
+    if (processingNotifications) {
+      toast.warning('Already processing notifications, please wait...');
+      return;
+    }
+
+    if (timeSinceLastProcess < RATE_LIMIT_MS) {
+      const remainingTime = Math.ceil((RATE_LIMIT_MS - timeSinceLastProcess) / 1000);
+      toast.warning(`Please wait ${remainingTime} more seconds before sending alerts again`);
+      return;
+    }
+
     setProcessingNotifications(true);
+    setLastProcessTime(now);
+
+    // Safety timeout to reset button state after 30 seconds
+    const safetyTimeout = setTimeout(() => {
+      console.warn('Notification processing timed out, resetting state');
+      setProcessingNotifications(false);
+      toast.error('Processing timed out, please try again');
+    }, 30000);
+
     try {
+      console.log('Starting notification processing...');
       const result = await processNotifications();
-      toast.success(`Created ${result.notificationsCreated} notifications`);
+      console.log('Notification processing result:', result);
+
+      // Clear the safety timeout since we completed successfully
+      clearTimeout(safetyTimeout);
+
+      // Show appropriate success message based on results
+      if (result.notificationsCreated > 0) {
+        toast.success(
+          `✓ Processed ${result.alertsProcessed} alerts, created ${result.notificationsCreated} notifications`
+        );
+      } else if (result.alertsProcessed > 0) {
+        toast.success(
+          `✓ Processed ${result.alertsProcessed} alerts (notifications already exist)`
+        );
+      } else {
+        toast.info('No new alerts to process at this time');
+      }
     } catch (error) {
-      toast.error('Failed to process notifications');
+      // Clear the safety timeout since we're handling the error
+      clearTimeout(safetyTimeout);
+
+      console.error('Notification processing error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process notifications';
+      toast.error(`✗ ${errorMessage}`);
     } finally {
+      // Always reset processing state, no matter what happens
+      console.log('Resetting processing state...');
       setProcessingNotifications(false);
     }
   };
@@ -292,16 +391,35 @@ const ModernWarrantyAlertPanel = React.memo(() => {
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                   Critical Items ({criticalAlerts.length})
                 </h4>
-                <Button
-                  onClick={handleProcessNotifications}
-                  disabled={processingNotifications}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 text-sm bg-accent/10 hover:bg-accent/20 text-accent hover:text-accent-foreground border border-accent/30 hover:border-accent/50 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed hover:scale-[1.02] font-medium"
-                >
-                  <Bell className="h-4 w-4 mr-2" />
-                  {processingNotifications ? 'Sending...' : 'Send Alerts'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleProcessNotifications}
+                    disabled={processingNotifications || isOnCooldown || loading}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-sm bg-accent/10 hover:bg-accent/20 text-accent hover:text-accent-foreground border border-accent/30 hover:border-accent/50 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed hover:scale-[1.02] font-medium disabled:opacity-50 disabled:hover:scale-100"
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    {processingNotifications
+                      ? 'Sending...'
+                      : isOnCooldown
+                      ? `Wait ${cooldownTimeLeft}s`
+                      : 'Send Alerts'}
+                  </Button>
+
+                  {/* Emergency reset button - only show if processing for more than 10 seconds */}
+                  {processingNotifications && (Date.now() - lastProcessTime) > 10000 && (
+                    <Button
+                      onClick={emergencyReset}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2 text-xs text-destructive hover:text-destructive-foreground hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50 transition-all duration-200"
+                      title="Reset if button is stuck"
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {criticalAlerts.map((alert, index) => (
