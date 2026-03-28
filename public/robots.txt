@@ -1,5 +1,5 @@
 # Robots.txt for Bill Vault
-# https://bill-vault-sts.vercel.app
+# https://billvault.silentthundersquad.in
 
 User-agent: *
 Allow: /
@@ -22,4 +22,4 @@ Allow: /terms-of-service
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://bill-vault-sts.vercel.app/sitemap.xml
+Sitemap: https://billvault.silentthundersquad.in/sitemap.xml

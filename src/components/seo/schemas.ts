@@ -74,12 +74,12 @@ export const organizationSchema: OrganizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Bill Vault',
-  url: 'https://bill-vault-sts.vercel.app',
+  url: 'https://billvault.silentthundersquad.in',
   description: 'Digital bill storage and warranty tracking platform that helps users manage their receipts, track warranties, and never miss important expiry dates.',
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer service',
-    url: 'https://bill-vault-sts.vercel.app'
+    url: 'https://billvault.silentthundersquad.in'
   }
 };
 
@@ -88,7 +88,7 @@ export const webApplicationSchema: WebApplicationSchema = {
   '@type': 'WebApplication',
   name: 'Bill Vault',
   description: 'Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning.',
-  url: 'https://bill-vault-sts.vercel.app',
+  url: 'https://billvault.silentthundersquad.in',
   applicationCategory: 'FinanceApplication',
   operatingSystem: 'Web',
   featureList: [
@@ -109,7 +109,7 @@ export const webApplicationSchema: WebApplicationSchema = {
   author: {
     '@type': 'Organization',
     name: 'Bill Vault',
-    url: 'https://bill-vault-sts.vercel.app'
+    url: 'https://billvault.silentthundersquad.in'
   }
 };
 
@@ -118,7 +118,7 @@ export const softwareApplicationSchema: SoftwareApplicationSchema = {
   '@type': 'SoftwareApplication',
   name: 'Bill Vault - Warranty Tracker',
   description: 'Professional bill management and warranty tracking application with OCR technology for automatic data extraction.',
-  url: 'https://bill-vault-sts.vercel.app',
+  url: 'https://billvault.silentthundersquad.in',
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web Browser',
   featureList: [

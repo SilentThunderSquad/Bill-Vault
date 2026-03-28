@@ -35,7 +35,7 @@ const publicPages = [
   }
 ];
 
-const baseUrl = 'https://bill-vault-sts.vercel.app';
+const baseUrl = 'https://billvault.silentthundersquad.in';
 
 function generateSitemap() {
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

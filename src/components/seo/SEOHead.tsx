@@ -16,10 +16,10 @@ const DEFAULT_SEO: Required<Omit<SEOProps, 'schema'>> = {
   title: 'Bill Vault - Manage Your Bills & Warranty Easily',
   description: 'Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning. Never miss a warranty claim again.',
   keywords: 'warranty tracker, bill storage, invoice manager, warranty expiry alert, OCR bill scanner, product warranty, bill vault, warranty management',
-  image: 'https://bill-vault-sts.vercel.app/og-image.png',
-  url: 'https://bill-vault-sts.vercel.app',
+  image: 'https://billvault.silentthundersquad.in/og-image.png',
+  url: 'https://billvault.silentthundersquad.in',
   type: 'website',
-  canonical: 'https://bill-vault-sts.vercel.app',
+  canonical: 'https://billvault.silentthundersquad.in',
   noindex: false
 };
 

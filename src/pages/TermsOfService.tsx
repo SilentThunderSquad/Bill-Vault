@@ -6,8 +6,8 @@ import { createBreadcrumbSchema } from '@/components/seo/schemas';
 
 export default function TermsOfService() {
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Home', url: 'https://bill-vault-sts.vercel.app/' },
-    { name: 'Terms of Service', url: 'https://bill-vault-sts.vercel.app/terms-of-service' }
+    { name: 'Home', url: 'https://billvault.silentthundersquad.in/' },
+    { name: 'Terms of Service', url: 'https://billvault.silentthundersquad.in/terms-of-service' }
   ]);
 
   const fadeInUp = {
@@ -335,7 +335,7 @@ export default function TermsOfService() {
         title="Terms of Service - Bill Vault App Legal Agreement"
         description="Terms of Service for Bill Vault warranty tracker and bill management app. Understand your rights and responsibilities when using our digital receipt storage service."
         keywords="terms of service, bill vault terms, warranty tracker legal, bill management app terms, user agreement, app terms and conditions"
-        url="https://bill-vault-sts.vercel.app/terms-of-service"
+        url="https://billvault.silentthundersquad.in/terms-of-service"
         schema={breadcrumbSchema}
       />
       <div className="min-h-screen bg-gradient-to-b from-accent/5 via-transparent to-background">

@@ -16,7 +16,7 @@ export default function Landing() {
         title="Warranty Tracker App - Never Miss a Warranty Claim"
         description="The ultimate bill storage and warranty tracking app. Upload receipts with OCR scanning, track warranty expiry dates, and get smart alerts. Free warranty tracker for all your products."
         keywords="warranty tracker app, bill management app, invoice storage app, warranty reminder app, OCR bill scanner, digital receipt storage, warranty expiry alert, product warranty tracker, bill vault, invoice manager"
-        url="https://bill-vault-sts.vercel.app"
+        url="https://billvault.silentthundersquad.in"
         type="website"
         schema={[organizationSchema, webApplicationSchema]}
       />

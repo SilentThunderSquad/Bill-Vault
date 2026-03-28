@@ -6,8 +6,8 @@ import { createBreadcrumbSchema } from '@/components/seo/schemas';
 
 export default function PrivacyPolicy() {
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Home', url: 'https://bill-vault-sts.vercel.app/' },
-    { name: 'Privacy Policy', url: 'https://bill-vault-sts.vercel.app/privacy-policy' }
+    { name: 'Home', url: 'https://billvault.silentthundersquad.in/' },
+    { name: 'Privacy Policy', url: 'https://billvault.silentthundersquad.in/privacy-policy' }
   ]);
 
   const fadeInUp = {
@@ -256,7 +256,7 @@ export default function PrivacyPolicy() {
         title="Privacy Policy - Bill Management App Data Protection"
         description="Privacy Policy for Bill Vault warranty tracker app. Learn how we collect, use, and protect your personal information and bill data securely. GDPR & CCPA compliant."
         keywords="privacy policy, bill vault privacy, warranty tracker privacy, data protection, bill management app privacy, OCR scanning privacy, GDPR compliance"
-        url="https://bill-vault-sts.vercel.app/privacy-policy"
+        url="https://billvault.silentthundersquad.in/privacy-policy"
         schema={breadcrumbSchema}
       />
       <div className="min-h-screen bg-gradient-to-b from-accent/5 via-transparent to-background">
