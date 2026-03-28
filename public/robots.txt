@@ -1,6 +1,7 @@
 # Robots.txt for Bill Vault
 # https://billvault.silentthundersquad.in
 
+# Allow all search engines
 User-agent: *
 Allow: /
 
@@ -18,8 +19,20 @@ Allow: /register
 Allow: /privacy-policy
 Allow: /terms-of-service
 
-# Crawl delay (optional - set to 1 second)
+# Crawl delay for all bots (1 second)
 Crawl-delay: 1
 
-# Sitemap
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+
+# Sitemap location
 Sitemap: https://billvault.silentthundersquad.in/sitemap.xml

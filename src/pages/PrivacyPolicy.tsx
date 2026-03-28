@@ -253,9 +253,9 @@ export default function PrivacyPolicy() {
   return (
     <>
       <SEOHead
-        title="Privacy Policy - Bill Management App Data Protection"
-        description="Privacy Policy for Bill Vault warranty tracker app. Learn how we collect, use, and protect your personal information and bill data securely. GDPR & CCPA compliant."
-        keywords="privacy policy, bill vault privacy, warranty tracker privacy, data protection, bill management app privacy, OCR scanning privacy, GDPR compliance"
+        title="Privacy Policy - Bill Vault Warranty Tracker | Data Protection & Security"
+        description="Privacy Policy for Bill Vault free warranty tracker app. Learn how we protect your bills, receipts, and warranty data with encryption and secure cloud storage. GDPR & CCPA compliant digital receipt management."
+        keywords="bill vault privacy policy, warranty tracker privacy, receipt storage security, data protection, bill management app privacy, OCR scanning privacy, GDPR compliance, secure bill storage, digital receipt privacy"
         url="https://billvault.silentthundersquad.in/privacy-policy"
         schema={breadcrumbSchema}
       />

@@ -13,9 +13,9 @@ export interface SEOProps {
 }
 
 const DEFAULT_SEO: Required<Omit<SEOProps, 'schema'>> = {
-  title: 'Bill Vault - Manage Your Bills & Warranty Easily',
-  description: 'Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning. Never miss a warranty claim again.',
-  keywords: 'warranty tracker, bill storage, invoice manager, warranty expiry alert, OCR bill scanner, product warranty, bill vault, warranty management',
+  title: 'Bill Vault - Free Warranty Tracker & Bill Scanner App',
+  description: 'Free warranty tracker & digital receipt storage app with OCR scanning. Track product warranties, scan bills automatically, get expiry alerts. Cloud-based bill management for all your receipts. Never miss a warranty claim!',
+  keywords: 'warranty tracker app, free warranty tracker, bill scanner app, digital receipt storage, OCR bill scanner, warranty management app, receipt organizer, invoice manager, warranty expiry alert, product warranty tracker, bill vault',
   image: 'https://billvault.silentthundersquad.in/og-image.png',
   url: 'https://billvault.silentthundersquad.in',
   type: 'website',

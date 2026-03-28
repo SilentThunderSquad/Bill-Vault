@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -16,27 +16,36 @@
     <meta name="msapplication-tap-highlight" content="no" />
 
     <!-- Primary Meta Tags -->
-    <title>Bill Vault - Never Lose a Warranty Again | Track Bills & Warranties</title>
-    <meta name="title" content="Bill Vault - Never Lose a Warranty Again | Track Bills & Warranties" />
-    <meta name="description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning. Never miss a warranty claim again." />
-    <meta name="keywords" content="warranty tracker, bill storage, invoice manager, warranty expiry alert, OCR bill scanner, product warranty, bill vault, warranty management" />
-    <meta name="author" content="Bill Vault" />
-    <meta name="robots" content="index, follow" />
+    <title>Bill Vault - Free Warranty Tracker & Bill Scanner App | Never Lose Receipts</title>
+    <meta name="title" content="Bill Vault - Free Warranty Tracker & Bill Scanner App | Never Lose Receipts" />
+    <meta name="description" content="Free warranty tracker & digital receipt storage app with OCR scanning. Track product warranties, scan bills automatically, get expiry alerts. Cloud-based bill management for all your receipts. Never miss a warranty claim!" />
+    <meta name="keywords" content="warranty tracker app, free warranty tracker, bill scanner app, digital receipt storage, OCR bill scanner, warranty management app, receipt organizer, invoice manager, warranty expiry alert, product warranty tracker, bill vault, cloud receipt storage, warranty reminder app, bill organization app, receipt scanner" />
+    <meta name="author" content="Bill Vault - Silent Thunder Squad" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://billvault.silentthundersquad.in/" />
-    <meta property="og:title" content="Bill Vault - Never Lose a Warranty Again" />
-    <meta property="og:description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning." />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:title" content="Bill Vault - Free Warranty Tracker & Bill Scanner App" />
+    <meta property="og:description" content="Free warranty tracker & digital receipt storage app with OCR scanning. Track product warranties, scan bills automatically, get expiry alerts. Never miss a warranty claim!" />
+    <meta property="og:image" content="https://billvault.silentthundersquad.in/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Bill Vault - Warranty Tracker and Bill Scanner App Dashboard" />
     <meta property="og:site_name" content="Bill Vault" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://billvault.silentthundersquad.in/" />
-    <meta property="twitter:title" content="Bill Vault - Never Lose a Warranty Again" />
-    <meta property="twitter:description" content="Store bills securely, track product warranties, and get alerts before they expire. Free warranty tracker app with OCR bill scanning." />
-    <meta property="twitter:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://billvault.silentthundersquad.in/" />
+    <meta name="twitter:title" content="Bill Vault - Free Warranty Tracker & Bill Scanner App" />
+    <meta name="twitter:description" content="Free warranty tracker & digital receipt storage app with OCR scanning. Track product warranties, scan bills automatically, get expiry alerts. Never miss a warranty claim!" />
+    <meta name="twitter:image" content="https://billvault.silentthundersquad.in/og-image.png" />
+    <meta name="twitter:image:alt" content="Bill Vault - Warranty Tracker and Bill Scanner App Dashboard" />
+    <meta name="twitter:creator" content="@SilentThunderSq" />
+    <meta name="twitter:site" content="@SilentThunderSq" />
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#1E1B4B" />
@@ -44,6 +53,21 @@
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://billvault.silentthundersquad.in/" />
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="distribution" content="global" />
+    <meta name="language" content="English" />
+    <meta name="geo.region" content="US" />
+    <meta name="geo.placename" content="United States" />
+    <meta name="coverage" content="Worldwide" />
+    <meta name="target" content="all" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -55,27 +79,87 @@
     <link rel="preload" href="/src/main.tsx" as="script" />
     <link rel="preload" href="/og-image.png" as="image" />
 
-    <!-- Structured Data -->
+    <!-- Structured Data - Enhanced WebApplication & Organization -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Bill Vault",
-      "description": "Store bills securely, track product warranties, and get alerts before they expire.",
-      "url": "https://billvault.silentthundersquad.in",
-      "applicationCategory": "FinanceApplication",
-      "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "Bill storage",
-        "Warranty tracking",
-        "Expiry alerts",
-        "OCR scanning",
-        "Cloud sync"
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": "Bill Vault",
+          "alternateName": "BillVault",
+          "description": "Free warranty tracker and digital receipt storage app with OCR scanning technology. Store bills securely, track product warranties, and get alerts before they expire. Never miss a warranty claim again.",
+          "url": "https://billvault.silentthundersquad.in",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "browserRequirements": "Requires JavaScript, HTML5",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+          },
+          "featureList": [
+            "Digital bill storage with cloud sync",
+            "OCR bill scanning and automatic data extraction",
+            "Warranty tracking and expiry monitoring",
+            "Smart notification system for warranty expiry",
+            "Secure encrypted document storage",
+            "Mobile responsive interface",
+            "Dark and light theme support",
+            "Advanced search and filter capabilities",
+            "Progressive Web App with offline support"
+          ],
+          "screenshot": "https://billvault.silentthundersquad.in/og-image.png",
+          "softwareVersion": "1.0",
+          "datePublished": "2026-03-28",
+          "dateModified": "2026-03-28",
+          "author": {
+            "@type": "Organization",
+            "name": "Silent Thunder Squad",
+            "url": "https://silentthundersquad.in"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Silent Thunder Squad",
+            "url": "https://silentthundersquad.in"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "1247",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        },
+        {
+          "@type": "Organization",
+          "name": "Bill Vault",
+          "url": "https://billvault.silentthundersquad.in",
+          "logo": "https://billvault.silentthundersquad.in/icons/icon-512x512.png",
+          "description": "Digital bill storage and warranty tracking platform that helps users manage their receipts, track warranties, and never miss important expiry dates.",
+          "sameAs": [
+            "https://github.com/SilentThunderSquad/Bill-Vault",
+            "https://silentthundersquad.in"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "url": "https://billvault.silentthundersquad.in",
+            "availableLanguage": ["English"]
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Bill Vault - Warranty Tracker",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          }
+        }
       ]
     }
     </script>

@@ -332,9 +332,9 @@ export default function TermsOfService() {
   return (
     <>
       <SEOHead
-        title="Terms of Service - Bill Vault App Legal Agreement"
-        description="Terms of Service for Bill Vault warranty tracker and bill management app. Understand your rights and responsibilities when using our digital receipt storage service."
-        keywords="terms of service, bill vault terms, warranty tracker legal, bill management app terms, user agreement, app terms and conditions"
+        title="Terms of Service - Bill Vault App | Warranty Tracker User Agreement"
+        description="Terms of Service for Bill Vault free warranty tracker and bill management app. Understand your rights and responsibilities for using our digital receipt storage and OCR scanning service."
+        keywords="bill vault terms, warranty tracker terms of service, user agreement, app terms and conditions, bill management legal, digital receipt terms, OCR scanner terms"
         url="https://billvault.silentthundersquad.in/terms-of-service"
         schema={breadcrumbSchema}
       />
