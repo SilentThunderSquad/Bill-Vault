@@ -2,12 +2,39 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import viteCompression from 'vite-plugin-compression'
 import path from 'path'
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Enable Fast Refresh
+      fastRefresh: true,
+      // Babel plugins for optimization
+      babel: {
+        plugins: [
+          // Remove PropTypes in production
+          ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }],
+        ],
+      },
+    }),
     tailwindcss(),
+    // Gzip compression
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240, // Only compress files > 10KB
+      algorithm: 'gzip',
+      ext: '.gz',
+    }),
+    // Brotli compression (better than gzip)
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotliCompress',
+      ext: '.br',
+    }),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/*.svg', 'icons/*.png', 'robots.txt', 'sitemap.xml'],
@@ -165,18 +192,61 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+      mangle: {
+        safari10: true,
       },
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'tesseract': ['tesseract.js'],
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui': ['framer-motion', 'lucide-react'],
-          'supabase': ['@supabase/supabase-js'],
-          'base-ui': ['@base-ui/react'],
+        manualChunks: (id) => {
+          // Separate each major library into its own chunk
+          if (id.includes('tesseract.js')) {
+            return 'tesseract';
+          }
+          if (id.includes('pdfjs-dist')) {
+            return 'pdfjs';
+          }
+          if (id.includes('recharts')) {
+            return 'recharts';
+          }
+          if (id.includes('framer-motion')) {
+            return 'framer-motion';
+          }
+          if (id.includes('node_modules')) {
+            // Split node_modules into smaller chunks
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            if (id.includes('@base-ui')) {
+              return 'base-ui';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('react-router-dom') || id.includes('react-router')) {
+              return 'router';
+            }
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor';
+            }
+            if (id.includes('date-fns')) {
+              return 'date-utils';
+            }
+            // Other node_modules → vendor chunk
+            return 'vendor-libs';
+          }
         },
+        // Optimize chunk file names
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 500,
+    // Enable source maps for production debugging (optional)
+    sourcemap: false,
   },
 })
