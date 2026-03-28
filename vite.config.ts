@@ -2,39 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import viteCompression from 'vite-plugin-compression'
 import path from 'path'
 
 export default defineConfig({
   plugins: [
-    react({
-      // Enable Fast Refresh
-      fastRefresh: true,
-      // Babel plugins for optimization
-      babel: {
-        plugins: [
-          // Remove PropTypes in production
-          ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }],
-        ],
-      },
-    }),
+    react(),
     tailwindcss(),
-    // Gzip compression
-    viteCompression({
-      verbose: true,
-      disable: false,
-      threshold: 10240, // Only compress files > 10KB
-      algorithm: 'gzip',
-      ext: '.gz',
-    }),
-    // Brotli compression (better than gzip)
-    viteCompression({
-      verbose: true,
-      disable: false,
-      threshold: 10240,
-      algorithm: 'brotliCompress',
-      ext: '.br',
-    }),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/*.svg', 'icons/*.png', 'robots.txt', 'sitemap.xml'],
@@ -191,14 +164,11 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-      },
-      mangle: {
-        safari10: true,
       },
     },
     rollupOptions: {
       output: {
+<<<<<<< HEAD
         manualChunks: (id) => {
           // Early return for React core to prevent circular dependencies
           if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler/')) {
@@ -239,16 +209,23 @@ export default defineConfig({
             // All other node_modules go to vendor
             return 'vendor';
           }
+=======
+        manualChunks: {
+          'tesseract': ['tesseract.js'],
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui': ['framer-motion', 'lucide-react'],
+          'supabase': ['@supabase/supabase-js'],
+          'base-ui': ['@base-ui/react'],
+>>>>>>> parent of 397e578 (Build & performance optimizations, lazy charts)
         },
-        // Optimize chunk file names
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+<<<<<<< HEAD
     // Single chunk size warning limit
     chunkSizeWarningLimit: 600,
     // Disable source maps for smaller builds
     sourcemap: false,
+=======
+>>>>>>> parent of 397e578 (Build & performance optimizations, lazy charts)
   },
 })

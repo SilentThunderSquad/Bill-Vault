@@ -2,54 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Performance-Optimized Animations - Use these instead of Framer Motion for simple animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Animation utility classes */
-.animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
-.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-.animate-fade-in-scale { animation: fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-
-/* Stagger delays */
-.animate-stagger-1 { animation-delay: 0ms; }
-.animate-stagger-2 { animation-delay: 100ms; }
-.animate-stagger-3 { animation-delay: 200ms; }
-.animate-stagger-4 { animation-delay: 300ms; }
-
-/* Respect user's motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 @custom-variant dark (&:is(.dark *));
 
 @theme {
