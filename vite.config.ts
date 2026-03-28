@@ -186,7 +186,6 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 600,
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -201,6 +200,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
+          // Early return for React core to prevent circular dependencies
+          if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler/')) {
+            return 'react-core';
+          }
+          
           // Separate each major library into its own chunk
           if (id.includes('tesseract.js')) {
             return 'tesseract';
@@ -214,8 +218,9 @@ export default defineConfig({
           if (id.includes('framer-motion')) {
             return 'framer-motion';
           }
+          
+          // Other specific libraries
           if (id.includes('node_modules')) {
-            // Split node_modules into smaller chunks
             if (id.includes('@supabase')) {
               return 'supabase';
             }
@@ -228,14 +233,11 @@ export default defineConfig({
             if (id.includes('react-router-dom') || id.includes('react-router')) {
               return 'router';
             }
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor';
-            }
             if (id.includes('date-fns')) {
               return 'date-utils';
             }
-            // Other node_modules → vendor chunk
-            return 'vendor-libs';
+            // All other node_modules go to vendor
+            return 'vendor';
           }
         },
         // Optimize chunk file names
@@ -244,9 +246,9 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 500,
-    // Enable source maps for production debugging (optional)
+    // Single chunk size warning limit
+    chunkSizeWarningLimit: 600,
+    // Disable source maps for smaller builds
     sourcemap: false,
   },
 })
