@@ -13,10 +13,9 @@ A comprehensive security overhaul for the Bill Vault PWA to achieve production-g
 - ✓ **PWA Foundation** — Service Worker and manifest configured for offline access.
 - ✓ **Client-Side Document Processing** — OCR and PDF parsing implemented without server-side data exposure.
 - ✓ **Basic Authentication Flow** — Functional login/register using Supabase Auth.
+- ✓ **Hardened Row Level Security (RLS)** — Validated in Phase 1: DB & Storage Hardening.
+- ✓ **Secure Storage Policies** — Validated in Phase 1: DB & Storage Hardening.
 
-### Active
-- [ ] **Hardened Row Level Security (RLS)** — Audit and implement strict isolation for all tables (`bills`, `profiles`, `settings`).
-- [ ] **Secure Storage Policies** — Restrict file uploads to valid mime-types/sizes and enforce ownership at the storage level.
 - [ ] **Content Security Policy (CSP)** — Implement strict CSP headers to prevent XSS and unauthorized data exfiltration.
 - [ ] **Enhanced Authentication** — Implement Multi-Factor Authentication (MFA) support and secure session management.
 - [ ] **Input Validation & Sanitization** — Systematic use of Zod or equivalent for all API interactions and form inputs.
@@ -32,7 +31,7 @@ A comprehensive security overhaul for the Bill Vault PWA to achieve production-g
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| **Supabase Native Security** | Leveraging built-in RLS and Auth instead of third-party wrappers to minimize attack surface. | — Pending |
+| **Supabase Native Security** | Leveraging built-in RLS and Auth instead of third-party wrappers to minimize attack surface. | ✓ Validated in Phase 1 |
 | **Client-Side Heavy OCR** | Keeping document processing on the client avoids "Data in Flight" risks to external servers. | — Existing |
 | **Strict CSP** | Blocking all non-essential scripts and domains (e.g., GTM restricted to known IDs). | — Pending |
 
@@ -54,4 +53,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 after initialization*
+*Last updated: 2026-04-20 after Phase 1 completion*
