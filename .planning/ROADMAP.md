@@ -25,7 +25,7 @@ This roadmap outlines the journey to a production-ready, secure environment for 
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Implement RLS policies for `bills`, `profiles`, and `settings`.
+- [x] 01-01: Implement RLS policies for `bills`, `profiles`, and `settings`.
 - [ ] 01-02: Configure Storage Bucket policies and DB audit triggers.
 
 ### Phase 2: Validation & Sanitization
